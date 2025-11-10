@@ -34,11 +34,14 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const load = async () => {
+      console.log("[v0] Loading Farcaster SDK...")
       const frameContext = await sdk.context
+      console.log("[v0] Frame context:", frameContext)
       setContext(frameContext)
 
       // Get wallet address from Farcaster context
       const address = frameContext?.user?.custody_address || frameContext?.user?.verified_addresses?.eth_addresses?.[0]
+      console.log("[v0] Initial wallet address:", address)
 
       if (address) {
         setWalletAddress(address)
@@ -57,6 +60,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
 
   const fetchBalance = async (address: string) => {
     try {
+      console.log("[v0] Fetching balance for:", address)
       const response = await fetch("https://mainnet.base.org", {
         method: "POST",
         headers: {
@@ -71,6 +75,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
       })
 
       const data = await response.json()
+      console.log("[v0] Balance response:", data)
       if (data.result) {
         // Convert from Wei to ETH
         const balanceInWei = BigInt(data.result)
@@ -78,16 +83,30 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
         setEthBalance(balanceInEth.toFixed(4))
       }
     } catch (error) {
-      console.error("Error fetching balance:", error)
+      console.error("[v0] Error fetching balance:", error)
       setEthBalance("0.0000")
     }
   }
 
   const connectWallet = async () => {
     try {
-      if (context?.user) {
-        const address = context.user.custody_address || context.user.verified_addresses?.eth_addresses?.[0]
+      console.log("[v0] Attempting to connect wallet...")
 
+      // Request wallet access from Farcaster
+      const result = await sdk.wallet.ethProvider.request({
+        method: "eth_requestAccounts",
+      })
+
+      console.log("[v0] Wallet connection result:", result)
+
+      if (result && Array.isArray(result) && result.length > 0) {
+        const address = result[0]
+        setWalletAddress(address)
+        setIsWalletConnected(true)
+        await fetchBalance(address)
+      } else {
+        // Fallback to context addresses
+        const address = context?.user?.custody_address || context?.user?.verified_addresses?.eth_addresses?.[0]
         if (address) {
           setWalletAddress(address)
           setIsWalletConnected(true)
@@ -95,7 +114,14 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (error) {
-      console.error("Error connecting wallet:", error)
+      console.error("[v0] Error connecting wallet:", error)
+      // Try fallback method
+      const address = context?.user?.custody_address || context?.user?.verified_addresses?.eth_addresses?.[0]
+      if (address) {
+        setWalletAddress(address)
+        setIsWalletConnected(true)
+        await fetchBalance(address)
+      }
     }
   }
 
