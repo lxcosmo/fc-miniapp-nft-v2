@@ -1,8 +1,0 @@
-{
-  "version": "vNext",
-  "name": "NFT Wallet",
-  "homepage_url": "https://miniapp-nft-v2.vercel.app/",
-  "description": "Advanced NFT wallet",
-  "icon_url": "https://miniapp-nft-v2.vercel.app/icon.png",
-  "app_url": "https://miniapp-nft-v2.vercel.app/"
-}

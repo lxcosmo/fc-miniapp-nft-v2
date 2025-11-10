@@ -1,26 +1,39 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { useFarcaster } from "@/app/providers"
 
 export function WalletBalance() {
-  const { isSDKLoaded, context } = useFarcaster()
+  const { isSDKLoaded, walletAddress, ethBalance, isWalletConnected, connectWallet } = useFarcaster()
 
-  const walletAddress = context?.user?.custody_address || context?.user?.verified_addresses?.eth_addresses?.[0]
+  const ethToUsd = 2850
+  const usdBalance = ethBalance ? (Number.parseFloat(ethBalance) * ethToUsd).toFixed(2) : "0.00"
 
   return (
     <Card className="p-6 bg-card border-border">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex-1">
           <p className="text-sm text-muted-foreground mb-1">Total Balance</p>
           {isSDKLoaded ? (
             <>
-              <h2 className="text-3xl font-semibold text-foreground">2.45 ETH</h2>
-              <p className="text-sm text-muted-foreground mt-1">≈ $4,523.67 USD</p>
-              {walletAddress && (
-                <p className="text-xs text-muted-foreground mt-2 font-mono">
-                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
-                </p>
+              {isWalletConnected && ethBalance !== null ? (
+                <>
+                  <h2 className="text-3xl font-semibold text-foreground">{ethBalance} ETH</h2>
+                  <p className="text-sm text-muted-foreground mt-1">≈ ${usdBalance} USD</p>
+                  {walletAddress && (
+                    <p className="text-xs text-muted-foreground mt-2 font-mono">
+                      {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <div className="mt-2">
+                  <p className="text-sm text-muted-foreground mb-3">Connect your wallet to see balance</p>
+                  <Button onClick={connectWallet} size="sm" className="bg-primary hover:bg-primary/90">
+                    Connect Wallet
+                  </Button>
+                </div>
               )}
             </>
           ) : (
