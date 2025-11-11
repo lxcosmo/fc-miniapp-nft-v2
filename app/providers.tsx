@@ -34,11 +34,13 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const load = async () => {
+      console.log("[v0] Loading Farcaster SDK...")
       const frameContext = await sdk.context
+      console.log("[v0] Frame context loaded:", frameContext)
       setContext(frameContext)
 
-      // Get wallet address from Farcaster context
       const address = frameContext?.user?.custody_address || frameContext?.user?.verified_addresses?.eth_addresses?.[0]
+      console.log("[v0] Wallet address from context:", address)
 
       if (address) {
         setWalletAddress(address)
@@ -49,6 +51,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
 
       // Notify Farcaster that the app is ready
       sdk.actions.ready()
+      console.log("[v0] SDK ready called")
       setIsSDKLoaded(true)
     }
 

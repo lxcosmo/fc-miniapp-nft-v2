@@ -21,39 +21,51 @@ export function NFTGrid() {
 
   useEffect(() => {
     const fetchNFTs = async () => {
+      console.log("[v0] Fetching NFTs for wallet:", walletAddress)
+
       if (!walletAddress) {
+        console.log("[v0] No wallet address available")
         setLoading(false)
         return
       }
 
       try {
         setLoading(true)
-        // Using Alchemy public API for Base network
         const response = await fetch(
-          `https://base-mainnet.g.alchemy.com/nft/v3/docs-demo/getNFTsForOwner?owner=${walletAddress}&withMetadata=true&pageSize=12`,
+          `https://api.simplehash.com/api/v0/nfts/owners?chains=base&wallet_addresses=${walletAddress}&limit=12`,
+          {
+            headers: {
+              Accept: "application/json",
+              "X-API-KEY": "simplehash_public_demo",
+            },
+          },
         )
 
+        console.log("[v0] NFT API response status:", response.status)
         const data = await response.json()
+        console.log("[v0] NFT data received:", data)
 
-        if (data.ownedNfts && data.ownedNfts.length > 0) {
-          const formattedNFTs = data.ownedNfts.slice(0, 12).map((nft: any) => ({
-            id: `${nft.contract.address}-${nft.tokenId}`,
-            name: nft.name || nft.contract.name || "Unnamed NFT",
-            collection: nft.contract.name || "Unknown Collection",
+        if (data.nfts && data.nfts.length > 0) {
+          const formattedNFTs = data.nfts.slice(0, 12).map((nft: any) => ({
+            id: `${nft.contract_address}-${nft.token_id}`,
+            name: nft.name || nft.collection?.name || "Unnamed NFT",
+            collection: nft.collection?.name || "Unknown Collection",
             image:
-              nft.image?.thumbnailUrl ||
-              nft.image?.cachedUrl ||
-              nft.image?.originalUrl ||
-              "/placeholder.svg?height=400&width=400",
-            tokenId: nft.tokenId,
-            contractAddress: nft.contract.address,
+              nft.image_url ||
+              nft.previews?.image_medium_url ||
+              nft.previews?.image_small_url ||
+              "/digital-art-collection.png",
+            tokenId: nft.token_id,
+            contractAddress: nft.contract_address,
           }))
+          console.log("[v0] Formatted NFTs:", formattedNFTs)
           setNfts(formattedNFTs)
         } else {
+          console.log("[v0] No NFTs found in response")
           setNfts([])
         }
       } catch (error) {
-        console.error("Error fetching NFTs:", error)
+        console.error("[v0] Error fetching NFTs:", error)
         setNfts([])
       } finally {
         setLoading(false)
@@ -90,7 +102,10 @@ export function NFTGrid() {
   if (nfts.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
-        <p>No NFTs found in your wallet</p>
+        <p>No NFTs found in your wallet on Base network</p>
+        <p className="text-xs mt-2">
+          Wallet: {walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}
+        </p>
       </div>
     )
   }
