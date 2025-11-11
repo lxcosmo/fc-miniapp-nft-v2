@@ -1,6 +1,6 @@
 {
   "frame": {
-    "name": "NFT AWallet",
+    "name": "NFT aWallet",
     "version": "1",
     "iconUrl": "https://miniapp-nft-v2.vercel.app/icon.png",
     "homeUrl": "https://miniapp-nft-v2.vercel.app",
@@ -8,7 +8,7 @@
     "splashImageUrl": "https://miniapp-nft-v2.vercel.app/splash.png",
     "splashBackgroundColor": "#ffffff",
     "webhookUrl": "https://miniapp-nft-v2.vercel.app/api/webhook",
-    "subtitle": "Advanced NFT wallet",
+    "subtitle": "Advanced NFT Wallet",
     "description": "FT Wallet for Farcaster — view your NFTs, explore collections, and manage assets directly inside Warpcast.",
     "primaryCategory": "utility"
   },
