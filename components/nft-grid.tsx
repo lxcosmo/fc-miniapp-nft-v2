@@ -75,8 +75,8 @@ export function NFTGrid({ gridMode }: NFTGridProps) {
       : gridMode === 2
         ? "grid-cols-2"
         : gridMode === 3
-          ? "grid-cols-2 md:grid-cols-3"
-          : "grid-cols-2 md:grid-cols-4"
+          ? "grid-cols-3"
+          : "grid-cols-4"
 
   const handleNFTClick = (nft: NFT) => {
     const nftData = encodeURIComponent(JSON.stringify(nft))
@@ -89,8 +89,8 @@ export function NFTGrid({ gridMode }: NFTGridProps) {
         {[...Array(6)].map((_, i) => (
           <Card key={i} className="overflow-hidden border-border bg-card">
             <div className="aspect-square relative bg-muted animate-pulse" />
-            <div className="p-2">
-              <div className="h-4 bg-muted animate-pulse rounded mb-1.5" />
+            <div className="p-1">
+              <div className="h-4 bg-muted animate-pulse rounded mb-1" />
               <div className="h-3 bg-muted animate-pulse rounded w-2/3" />
             </div>
           </Card>
@@ -156,9 +156,9 @@ export function NFTGrid({ gridMode }: NFTGridProps) {
           <div className="aspect-square relative bg-muted">
             <Image src={nft.image || "/placeholder.svg"} alt={nft.name} fill className="object-cover" />
           </div>
-          <div className="p-2">
-            <h3 className="font-semibold text-sm text-foreground truncate">{nft.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{nft.collection}</p>
+          <div className="p-1">
+            <h3 className="font-semibold text-xs text-foreground truncate">{nft.name}</h3>
+            <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{nft.collection}</p>
           </div>
         </Card>
       ))}
