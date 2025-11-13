@@ -41,11 +41,24 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
       setIsSearching(true)
       try {
         const response = await fetch(
-          `https://searchcaster.xyz/api/search?text=${encodeURIComponent(recipient)}&limit=5`,
+          `https://api.warpcast.com/v2/user-by-username?username=${encodeURIComponent(recipient)}`,
         )
         const data = await response.json()
         console.log("[v0] Farcaster search results:", data)
-        setSearchResults(data.casts || [])
+
+        if (data.result?.user) {
+          setSearchResults([
+            {
+              fid: data.result.user.fid,
+              username: data.result.user.username,
+              displayName: data.result.user.displayName,
+              pfpUrl: data.result.user.pfp?.url,
+              addresses: data.result.user.verifications || [],
+            },
+          ])
+        } else {
+          setSearchResults([])
+        }
       } catch (error) {
         console.error("[v0] Error searching Farcaster users:", error)
         setSearchResults([])
@@ -83,12 +96,13 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
       console.log("[v0] Using Farcaster wallet, signer address:", await signer.getAddress())
 
-      const ERC721_ABI = ["function safeTransferFrom(address from, address to, uint256 tokenId)"]
+      const ERC721_ABI = ["function transferFrom(address from, address to, uint256 tokenId)"]
 
       for (const nft of nftData || []) {
         console.log("[v0] Sending NFT:", nft.tokenId, "from contract:", nft.contractAddress)
         const contract = new ethers.Contract(nft.contractAddress, ERC721_ABI, signer)
-        const tx = await contract.safeTransferFrom(walletAddress, recipient, nft.tokenId)
+
+        const tx = await contract.transferFrom(walletAddress, recipient, nft.tokenId)
         console.log("[v0] Transaction sent:", tx.hash)
         await tx.wait()
         console.log("[v0] Transaction confirmed:", tx.hash)
@@ -138,7 +152,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                       <button
                         key={user.fid}
                         onClick={() => {
-                          const address = user.addresses?.verifiedAddresses?.ethAddresses?.[0]
+                          const address = user.addresses?.[0]
                           if (address) {
                             handleSelectRecipient(address)
                           }
