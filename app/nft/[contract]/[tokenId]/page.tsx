@@ -118,7 +118,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
         </div>
       </div>
 
-      <SendNFTModal isOpen={showSendModal} onClose={() => setShowSendModal(false)} nftIds={[nft.id]} />
+      <SendNFTModal isOpen={showSendModal} onClose={() => setShowSendModal(false)} nftIds={[nft.id]} nftData={[nft]} />
     </div>
   )
 }
