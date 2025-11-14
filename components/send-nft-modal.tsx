@@ -18,7 +18,7 @@ interface FarcasterUser {
   username: string
   displayName: string
   pfpUrl?: string
-  addresses: { verifiedAddresses: { ethAddresses: string[] } }
+  ethAddress?: string
 }
 
 export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalProps) {
@@ -39,23 +39,34 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
       }
 
       setIsSearching(true)
+      console.log("[v0] Searching for username:", recipient)
+      
       try {
+        // Search using Neynar API (free public endpoint)
         const response = await fetch(
-          `https://api.warpcast.com/v2/user-by-username?username=${encodeURIComponent(recipient)}`,
+          `https://api.neynar.com/v2/farcaster/user/search?q=${encodeURIComponent(recipient)}&limit=5`,
+          {
+            headers: {
+              'accept': 'application/json',
+              'api_key': 'NEYNAR_API_DOCS' // Public demo key
+            }
+          }
         )
+        
         const data = await response.json()
-        console.log("[v0] Farcaster search results:", data)
+        console.log("[v0] Search response:", data)
 
-        if (data.result?.user) {
-          setSearchResults([
-            {
-              fid: data.result.user.fid,
-              username: data.result.user.username,
-              displayName: data.result.user.displayName,
-              pfpUrl: data.result.user.pfp?.url,
-              addresses: data.result.user.verifications || [],
-            },
-          ])
+        if (data.result?.users && data.result.users.length > 0) {
+          const users = data.result.users.map((user: any) => ({
+            fid: user.fid,
+            username: user.username,
+            displayName: user.display_name || user.username,
+            pfpUrl: user.pfp_url,
+            ethAddress: user.verified_addresses?.eth_addresses?.[0] || user.custody_address
+          })).filter((u: FarcasterUser) => u.ethAddress) // Only show users with addresses
+          
+          console.log("[v0] Parsed users:", users)
+          setSearchResults(users)
         } else {
           setSearchResults([])
         }
@@ -90,31 +101,55 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
       }
 
       const { ethers } = await import("ethers")
-
       const provider = new ethers.BrowserProvider(sdk.wallet.ethProvider)
       const signer = await provider.getSigner()
 
       console.log("[v0] Using Farcaster wallet, signer address:", await signer.getAddress())
 
-      const ERC721_ABI = ["function transferFrom(address from, address to, uint256 tokenId)"]
+      // ERC-721 ABI with transferFrom
+      const ERC721_ABI = [
+        "function transferFrom(address from, address to, uint256 tokenId) external"
+      ]
 
       for (const nft of nftData || []) {
-        console.log("[v0] Sending NFT:", nft.tokenId, "from contract:", nft.contractAddress)
-        const contract = new ethers.Contract(nft.contractAddress, ERC721_ABI, signer)
+        console.log("[v0] Processing NFT:", {
+          contract: nft.contract?.address || nft.contractAddress,
+          tokenId: nft.tokenId || nft.token_id
+        })
+        
+        const contractAddress = nft.contract?.address || nft.contractAddress
+        const tokenId = nft.tokenId || nft.token_id
+        
+        if (!contractAddress || !tokenId) {
+          console.error("[v0] Missing contract or tokenId:", nft)
+          continue
+        }
 
-        const tx = await contract.transferFrom(walletAddress, recipient, nft.tokenId)
+        const contract = new ethers.Contract(contractAddress, ERC721_ABI, signer)
+
+        console.log("[v0] Calling transferFrom:", {
+          from: walletAddress,
+          to: recipient,
+          tokenId: tokenId
+        })
+
+        const tx = await contract.transferFrom(walletAddress, recipient, tokenId)
         console.log("[v0] Transaction sent:", tx.hash)
-        await tx.wait()
-        console.log("[v0] Transaction confirmed:", tx.hash)
+        
+        const receipt = await tx.wait()
+        console.log("[v0] Transaction confirmed:", receipt)
       }
 
       setStep("success")
-    } catch (error) {
+    } catch (error: any) {
       console.error("[v0] Error sending NFT:", error)
-      alert(`Error sending NFT: ${error instanceof Error ? error.message : "Unknown error"}`)
-    } finally {
+      const errorMsg = error?.reason || error?.message || "Unknown error"
+      alert(`Error sending NFT: ${errorMsg}`)
       setIsSending(false)
+      return
     }
+    
+    setIsSending(false)
   }
 
   const handleClose = () => {
@@ -152,9 +187,8 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                       <button
                         key={user.fid}
                         onClick={() => {
-                          const address = user.addresses?.[0]
-                          if (address) {
-                            handleSelectRecipient(address)
+                          if (user.ethAddress) {
+                            handleSelectRecipient(user.ethAddress)
                           }
                         }}
                         className="w-full text-left p-3 hover:bg-muted transition-colors border-b border-border last:border-b-0"
@@ -163,10 +197,15 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                           {user.pfpUrl && (
                             <img src={user.pfpUrl || "/placeholder.svg"} alt="" className="w-8 h-8 rounded-full" />
                           )}
-                          <div>
+                          <div className="flex-1">
                             <p className="text-sm font-medium">{user.displayName}</p>
                             <p className="text-xs text-muted-foreground">@{user.username}</p>
                           </div>
+                          {user.ethAddress && (
+                            <p className="text-xs text-muted-foreground font-mono">
+                              {user.ethAddress.slice(0, 6)}...{user.ethAddress.slice(-4)}
+                            </p>
+                          )}
                         </div>
                       </button>
                     ))}
@@ -198,7 +237,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                 <p className="text-sm text-muted-foreground">No recent recipients</p>
               </div>
 
-              {recipient && !searchResults.length && (
+              {recipient && recipient.startsWith("0x") && (
                 <Button onClick={() => setStep("confirm")} className="w-full">
                   Continue
                 </Button>
