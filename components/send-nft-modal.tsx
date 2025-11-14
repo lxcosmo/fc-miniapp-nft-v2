@@ -24,6 +24,7 @@ interface FarcasterUser {
 export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalProps) {
   const [step, setStep] = useState<"recipient" | "confirm" | "success">("recipient")
   const [recipient, setRecipient] = useState("")
+  const [selectedUser, setSelectedUser] = useState<FarcasterUser | null>(null)
   const [searchResults, setSearchResults] = useState<FarcasterUser[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -38,7 +39,6 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         return
       }
 
-      // If it's an Ethereum address, search by address
       if (recipient.startsWith("0x") && recipient.length > 10) {
         setIsSearching(true)
         console.log("[v0] Searching by address:", recipient)
@@ -63,7 +63,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
               username: user.username,
               displayName: user.display_name || user.username,
               pfpUrl: user.pfp_url,
-              ethAddress: user.verified_addresses?.eth_addresses?.[0] || user.custody_address
+              ethAddress: user.custody_address
             }))
             
             console.log("[v0] Found users by address:", users)
@@ -80,18 +80,16 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         return
       }
 
-      // Search by username
       setIsSearching(true)
       console.log("[v0] Searching for username:", recipient)
       
       try {
-        // Search using Neynar API (free public endpoint)
         const response = await fetch(
           `https://api.neynar.com/v2/farcaster/user/search?q=${encodeURIComponent(recipient)}&limit=5`,
           {
             headers: {
               'accept': 'application/json',
-              'api_key': 'NEYNAR_API_DOCS' // Public demo key
+              'api_key': 'NEYNAR_API_DOCS'
             }
           }
         )
@@ -105,8 +103,8 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
             username: user.username,
             displayName: user.display_name || user.username,
             pfpUrl: user.pfp_url,
-            ethAddress: user.verified_addresses?.eth_addresses?.[0] || user.custody_address
-          })).filter((u: FarcasterUser) => u.ethAddress) // Only show users with addresses
+            ethAddress: user.custody_address
+          })).filter((u: FarcasterUser) => u.ethAddress)
           
           console.log("[v0] Parsed users:", users)
           setSearchResults(users)
@@ -125,8 +123,9 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
     return () => clearTimeout(timeoutId)
   }, [recipient])
 
-  const handleSelectRecipient = (address: string) => {
+  const handleSelectRecipient = (address: string, user?: FarcasterUser) => {
     setRecipient(address)
+    setSelectedUser(user || null)
     setSearchResults([])
     setStep("confirm")
   }
@@ -144,7 +143,6 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         throw new Error("Farcaster SDK sendToken not available")
       }
 
-      // Send each NFT using Farcaster SDK
       for (const nft of nftData || []) {
         const contractAddress = nft.contract?.address || nft.contractAddress
         const tokenId = nft.tokenId || nft.token_id
@@ -160,15 +158,15 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
           continue
         }
 
-        // Format: eip155:{chainId}:erc721:{contractAddress}/{tokenId}
-        const tokenCAIP = `eip155:8453:erc721:${contractAddress.toLowerCase()}/${tokenId}`
+        const normalizedTokenId = typeof tokenId === 'string' ? tokenId : tokenId.toString()
+        const tokenCAIP = `eip155:8453:erc721:${contractAddress.toLowerCase()}:${normalizedTokenId}`
         
         console.log("[v0] Token CAIP:", tokenCAIP)
         console.log("[v0] Calling sdk.actions.sendToken...")
 
         const result = await sdk.actions.sendToken({
           token: tokenCAIP,
-          amount: "1", // For NFTs, amount is always 1
+          amount: "1",
           recipientAddress: recipient.toLowerCase()
         })
 
@@ -200,6 +198,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
     setTimeout(() => {
       setStep("recipient")
       setRecipient("")
+      setSelectedUser(null)
       setSearchResults([])
     }, 300)
   }
@@ -231,7 +230,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                         key={user.fid}
                         onClick={() => {
                           if (user.ethAddress) {
-                            handleSelectRecipient(user.ethAddress)
+                            handleSelectRecipient(user.ethAddress, user)
                           }
                         }}
                         className="w-full text-left p-3 hover:bg-muted transition-colors border-b border-border last:border-b-0"
@@ -296,9 +295,21 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
               <div className="bg-muted rounded-lg overflow-hidden">
                 <div className="p-4">
                   <p className="text-sm text-muted-foreground mb-1">Sending to</p>
-                  <p className="text-sm font-mono font-medium">
-                    {recipient.slice(0, 6)}...{recipient.slice(-4)}
-                  </p>
+                  {selectedUser ? (
+                    <div className="flex items-center gap-2 mt-2">
+                      {selectedUser.pfpUrl && (
+                        <img src={selectedUser.pfpUrl || "/placeholder.svg"} alt="" className="w-8 h-8 rounded-full" />
+                      )}
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{selectedUser.displayName}</p>
+                        <p className="text-xs text-muted-foreground">@{selectedUser.username}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm font-mono font-medium">
+                      {recipient.slice(0, 6)}...{recipient.slice(-4)}
+                    </p>
+                  )}
                 </div>
 
                 <div className="h-[3px] bg-background/50" />
