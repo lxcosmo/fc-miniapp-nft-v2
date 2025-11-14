@@ -3,8 +3,8 @@ import { NFTGrid } from "@/components/nft-grid"
 import { useFarcaster } from "@/app/providers"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
+import { useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 
 export default function HiddenPage() {
   const { isSDKLoaded } = useFarcaster()
@@ -32,11 +32,21 @@ export default function HiddenPage() {
   }
 
   const handleUnhideSelected = () => {
+    console.log("[v0] Unhiding NFTs:", selectedNFTs)
     const hiddenNFTs = JSON.parse(localStorage.getItem("hidden_nfts") || "[]")
     const updatedHidden = hiddenNFTs.filter((id: string) => !selectedNFTs.includes(id))
+    
+    console.log("[v0] Previous hidden:", hiddenNFTs)
+    console.log("[v0] New hidden:", updatedHidden)
+    
     localStorage.setItem("hidden_nfts", JSON.stringify(updatedHidden))
+    
+    // Update local state immediately
+    setHiddenCount(updatedHidden.length)
     setSelectedNFTs([])
     setIsSelectionMode(false)
+    
+    // Force page refresh to reload NFTs
     window.location.reload()
   }
 

@@ -33,11 +33,54 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
   useEffect(() => {
     const searchUsers = async () => {
-      if (recipient.length < 2 || recipient.startsWith("0x")) {
+      if (recipient.length < 2) {
         setSearchResults([])
         return
       }
 
+      // If it's an Ethereum address, search by address
+      if (recipient.startsWith("0x") && recipient.length > 10) {
+        setIsSearching(true)
+        console.log("[v0] Searching by address:", recipient)
+        
+        try {
+          const response = await fetch(
+            `https://api.neynar.com/v2/farcaster/user/bulk-by-address?addresses=${recipient}`,
+            {
+              headers: {
+                'accept': 'application/json',
+                'api_key': 'NEYNAR_API_DOCS'
+              }
+            }
+          )
+          
+          const data = await response.json()
+          console.log("[v0] Address search response:", data)
+
+          if (data && Object.keys(data).length > 0) {
+            const users = Object.values(data).flat().map((user: any) => ({
+              fid: user.fid,
+              username: user.username,
+              displayName: user.display_name || user.username,
+              pfpUrl: user.pfp_url,
+              ethAddress: user.verified_addresses?.eth_addresses?.[0] || user.custody_address
+            }))
+            
+            console.log("[v0] Found users by address:", users)
+            setSearchResults(users)
+          } else {
+            setSearchResults([])
+          }
+        } catch (error) {
+          console.error("[v0] Error searching by address:", error)
+          setSearchResults([])
+        } finally {
+          setIsSearching(false)
+        }
+        return
+      }
+
+      // Search by username
       setIsSearching(true)
       console.log("[v0] Searching for username:", recipient)
       
@@ -90,43 +133,26 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
   const handleSend = async () => {
     setIsSending(true)
-    console.log("[v0] Starting NFT send process...")
+    console.log("[v0] Starting NFT send using Farcaster SDK...")
     console.log("[v0] Recipient:", recipient)
-    console.log("[v0] NFT IDs:", nftIds)
     console.log("[v0] NFT data:", nftData)
 
     try {
       const sdk = (await import("@farcaster/frame-sdk")).default
 
-      console.log("[v0] SDK loaded:", !!sdk)
-      console.log("[v0] SDK wallet:", !!sdk?.wallet)
-      console.log("[v0] SDK ethProvider:", !!sdk?.wallet?.ethProvider)
-
-      if (!sdk?.wallet?.ethProvider) {
-        throw new Error("No wallet found - Please open in Farcaster app")
+      if (!sdk?.actions?.sendToken) {
+        throw new Error("Farcaster SDK sendToken not available")
       }
 
-      const { ethers } = await import("ethers")
-      const provider = new ethers.BrowserProvider(sdk.wallet.ethProvider)
-      const signer = await provider.getSigner()
-      const signerAddress = await signer.getAddress()
-
-      console.log("[v0] Signer address:", signerAddress)
-      console.log("[v0] Wallet address from context:", walletAddress)
-
-      const ERC721_ABI = [
-        "function safeTransferFrom(address from, address to, uint256 tokenId, bytes data) external"
-      ]
-
+      // Send each NFT using Farcaster SDK
       for (const nft of nftData || []) {
         const contractAddress = nft.contract?.address || nft.contractAddress
         const tokenId = nft.tokenId || nft.token_id
         
-        console.log("[v0] Processing NFT transfer:", {
+        console.log("[v0] Sending NFT via SDK:", {
           contract: contractAddress,
           tokenId: tokenId,
-          from: signerAddress,
-          to: recipient
+          recipient: recipient
         })
         
         if (!contractAddress || !tokenId) {
@@ -134,30 +160,34 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
           continue
         }
 
-        const contract = new ethers.Contract(contractAddress, ERC721_ABI, signer)
+        // Build CAIP-19 token identifier for ERC-721 on Base
+        // Format: eip155:{chainId}/erc721:{contractAddress}/{tokenId}
+        const tokenCAIP = `eip155:8453/erc721:${contractAddress}/${tokenId}`
+        
+        console.log("[v0] Token CAIP:", tokenCAIP)
+        console.log("[v0] Calling sdk.actions.sendToken...")
 
-        console.log("[v0] Calling safeTransferFrom with empty bytes...")
-        
-        const tx = await contract.safeTransferFrom(signerAddress, recipient, tokenId, "0x")
-        console.log("[v0] Transaction sent, hash:", tx.hash)
-        
-        const receipt = await tx.wait()
-        console.log("[v0] Transaction confirmed:", receipt.hash)
+        const result = await sdk.actions.sendToken({
+          token: tokenCAIP,
+          amount: "1", // For NFTs, amount is always 1
+          recipientAddress: recipient
+        })
+
+        console.log("[v0] Send result:", result)
+
+        if (result.success) {
+          console.log("[v0] NFT sent successfully:", result.send.transaction)
+        } else {
+          console.error("[v0] Send failed:", result.reason, result.error)
+          throw new Error(`Send failed: ${result.reason} - ${result.error?.message || 'Unknown error'}`)
+        }
       }
 
-      console.log("[v0] All transfers completed successfully")
+      console.log("[v0] All NFTs sent successfully")
       setStep("success")
     } catch (error: any) {
       console.error("[v0] Error during send:", error)
-      console.error("[v0] Error details:", {
-        message: error?.message,
-        reason: error?.reason,
-        code: error?.code,
-        data: error?.data,
-        transaction: error?.transaction
-      })
-      
-      const errorMsg = error?.reason || error?.message || "Unknown error"
+      const errorMsg = error?.message || "Unknown error"
       alert(`Error sending NFT: ${errorMsg}`)
       setIsSending(false)
       return
@@ -251,8 +281,8 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                 <p className="text-sm text-muted-foreground">No recent recipients</p>
               </div>
 
-              {recipient && recipient.startsWith("0x") && (
-                <Button onClick={() => setStep("confirm")} className="w-full">
+              {recipient && (
+                <Button onClick={() => setStep("confirm")} className="w-full" disabled={isSending}>
                   Continue
                 </Button>
               )}
