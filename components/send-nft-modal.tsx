@@ -115,7 +115,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
       console.log("[v0] Wallet address from context:", walletAddress)
 
       const ERC721_ABI = [
-        "function transferFrom(address from, address to, uint256 tokenId) external"
+        "function safeTransferFrom(address from, address to, uint256 tokenId, bytes data) external"
       ]
 
       for (const nft of nftData || []) {
@@ -136,9 +136,9 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
         const contract = new ethers.Contract(contractAddress, ERC721_ABI, signer)
 
-        console.log("[v0] Calling transferFrom...")
+        console.log("[v0] Calling safeTransferFrom with empty bytes...")
         
-        const tx = await contract.transferFrom(signerAddress, recipient, tokenId)
+        const tx = await contract.safeTransferFrom(signerAddress, recipient, tokenId, "0x")
         console.log("[v0] Transaction sent, hash:", tx.hash)
         
         const receipt = await tx.wait()
@@ -153,7 +153,8 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         message: error?.message,
         reason: error?.reason,
         code: error?.code,
-        data: error?.data
+        data: error?.data,
+        transaction: error?.transaction
       })
       
       const errorMsg = error?.reason || error?.message || "Unknown error"
