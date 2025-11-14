@@ -160,9 +160,8 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
           continue
         }
 
-        // Build CAIP-19 token identifier for ERC-721 on Base
-        // Format: eip155:{chainId}/erc721:{contractAddress}/{tokenId}
-        const tokenCAIP = `eip155:8453/erc721:${contractAddress}/${tokenId}`
+        // Format: eip155:{chainId}:erc721:{contractAddress}/{tokenId}
+        const tokenCAIP = `eip155:8453:erc721:${contractAddress.toLowerCase()}/${tokenId}`
         
         console.log("[v0] Token CAIP:", tokenCAIP)
         console.log("[v0] Calling sdk.actions.sendToken...")
@@ -170,7 +169,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         const result = await sdk.actions.sendToken({
           token: tokenCAIP,
           amount: "1", // For NFTs, amount is always 1
-          recipientAddress: recipient
+          recipientAddress: recipient.toLowerCase()
         })
 
         console.log("[v0] Send result:", result)

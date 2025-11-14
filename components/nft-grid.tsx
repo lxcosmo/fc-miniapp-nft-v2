@@ -273,10 +273,10 @@ export function NFTGrid({
               <Image src={nft.image || "/placeholder.svg"} alt={nft.name} fill className="object-cover" />
             </div>
             {showDescriptions && (
-              <div className="p-1.5 space-y-0.5">
-                <h3 className="font-semibold text-[11px] text-foreground truncate leading-tight">{nft.name}</h3>
-                <p className="text-[9px] text-muted-foreground truncate leading-tight">{nft.collection}</p>
-                <p className="text-[9px] text-muted-foreground leading-tight">Floor: {nft.floorPrice} ETH</p>
+              <div className="p-1 space-y-0">
+                <h3 className="font-semibold text-[10px] text-foreground truncate leading-tight">{nft.name}</h3>
+                <p className="text-[8px] text-muted-foreground truncate leading-tight">{nft.collection}</p>
+                <p className="text-[8px] text-muted-foreground leading-tight">Floor: {nft.floorPrice} ETH</p>
               </div>
             )}
           </Card>
