@@ -106,9 +106,8 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
       console.log("[v0] Using Farcaster wallet, signer address:", await signer.getAddress())
 
-      // ERC-721 ABI with transferFrom
       const ERC721_ABI = [
-        "function transferFrom(address from, address to, uint256 tokenId) external"
+        "function safeTransferFrom(address from, address to, uint256 tokenId) external"
       ]
 
       for (const nft of nftData || []) {
@@ -127,13 +126,13 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
         const contract = new ethers.Contract(contractAddress, ERC721_ABI, signer)
 
-        console.log("[v0] Calling transferFrom:", {
+        console.log("[v0] Calling safeTransferFrom:", {
           from: walletAddress,
           to: recipient,
           tokenId: tokenId
         })
 
-        const tx = await contract.transferFrom(walletAddress, recipient, tokenId)
+        const tx = await contract.safeTransferFrom(walletAddress, recipient, tokenId)
         console.log("[v0] Transaction sent:", tx.hash)
         
         const receipt = await tx.wait()

@@ -4,8 +4,8 @@ import { Card } from "@/components/ui/card"
 import Image from "next/image"
 import { useFarcaster } from "@/app/providers"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Check } from "lucide-react"
+import { useRouter } from 'next/navigation'
+import { Check } from 'lucide-react'
 
 interface NFT {
   id: string
@@ -67,29 +67,65 @@ export function NFTGrid({
         if (allNFTs.length > 0) {
           const hiddenNFTs = JSON.parse(localStorage.getItem("hidden_nfts") || "[]")
 
-          const formattedNFTs = allNFTs
-            .map((nft: any) => ({
-              id: `${nft.contract.address}-${nft.tokenId}`,
-              name: nft.name || nft.contract.name || "Unnamed NFT",
-              collection: nft.contract.name || "Unknown Collection",
-              image:
-                nft.image?.cachedUrl ||
-                nft.image?.thumbnailUrl ||
-                nft.image?.originalUrl ||
-                "/digital-art-collection.png",
-              tokenId: nft.tokenId,
-              contractAddress: nft.contract.address,
-              floorPrice: nft.contract.openSeaMetadata?.floorPrice?.toString() || "—",
-            }))
-            .filter((nft: NFT) => {
-              if (isHiddenPage) {
-                return hiddenNFTs.includes(nft.id)
-              } else {
-                return !hiddenNFTs.includes(nft.id)
+          const checkReputation = async (contractAddress: string): Promise<string | null> => {
+            try {
+              const response = await fetch(
+                `https://api.basescan.org/api?module=contract&action=getsourcecode&address=${contractAddress}`
+              )
+              const data = await response.json()
+              
+              // Check if contract has suspicious/unsafe/spam reputation
+              if (data.result && data.result[0]) {
+                const reputation = data.result[0].Reputation
+                if (reputation === 'SUSPICIOUS' || reputation === 'UNSAFE' || reputation === 'SPAM') {
+                  console.log(`[v0] Auto-hiding NFT from contract ${contractAddress} due to ${reputation} reputation`)
+                  return reputation
+                }
+              }
+            } catch (error) {
+              console.error(`[v0] Error checking reputation for ${contractAddress}:`, error)
+            }
+            return null
+          }
+
+          const formattedNFTs = await Promise.all(
+            allNFTs.map(async (nft: any) => {
+              const nftId = `${nft.contract.address}-${nft.tokenId}`
+              const badReputation = await checkReputation(nft.contract.address)
+              
+              // Auto-hide NFTs with bad reputation
+              if (badReputation && !hiddenNFTs.includes(nftId)) {
+                hiddenNFTs.push(nftId)
+              }
+              
+              return {
+                id: nftId,
+                name: nft.name || nft.contract.name || "Unnamed NFT",
+                collection: nft.contract.name || "Unknown Collection",
+                image:
+                  nft.image?.cachedUrl ||
+                  nft.image?.thumbnailUrl ||
+                  nft.image?.originalUrl ||
+                  "/digital-art-collection.png",
+                tokenId: nft.tokenId,
+                contractAddress: nft.contract.address,
+                floorPrice: nft.contract.openSeaMetadata?.floorPrice?.toString() || "—",
               }
             })
+          )
 
-          setNfts(formattedNFTs)
+          // Save updated hidden NFTs list
+          localStorage.setItem("hidden_nfts", JSON.stringify(hiddenNFTs))
+
+          const filteredNFTs = formattedNFTs.filter((nft: NFT) => {
+            if (isHiddenPage) {
+              return hiddenNFTs.includes(nft.id)
+            } else {
+              return !hiddenNFTs.includes(nft.id)
+            }
+          })
+
+          setNfts(filteredNFTs)
         } else {
           setNfts([])
         }
