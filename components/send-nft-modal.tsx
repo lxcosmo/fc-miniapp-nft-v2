@@ -151,106 +151,58 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
   const handleSend = async () => {
     setIsSending(true)
-    console.log("[v0] ========== STARTING NFT SEND ==========")
-    console.log("[v0] Recipient address:", recipient)
-    console.log("[v0] Number of NFTs to send:", nftData?.length || 0)
-    console.log("[v0] NFT data received:", JSON.stringify(nftData, null, 2))
+    console.log("[v0] Starting NFT send...")
 
     try {
       const sdk = (await import("@farcaster/frame-sdk")).default
-      console.log("[v0] Farcaster SDK imported:", !!sdk)
-      console.log("[v0] SDK.actions available:", !!sdk?.actions)
-      console.log("[v0] SDK.actions.sendToken available:", !!sdk?.actions?.sendToken)
 
       if (!sdk?.actions?.sendToken) {
-        throw new Error("Farcaster SDK sendToken not available")
+        console.error("SDK not initialized or sendToken not supported in this context.")
+        alert("Mini app must be opened in Warpcast with connected wallet.")
+        setIsSending(false)
+        return
       }
 
       for (const nft of nftData || []) {
-        console.log("[v0] ========== PROCESSING NFT ==========")
-        console.log("[v0] Raw NFT object:", JSON.stringify(nft, null, 2))
+        console.log("[v0] Processing NFT:", nft)
         
         const contractAddress = nft.contract?.address || nft.contractAddress || nft.contract_address
-        const tokenId = nft.tokenId || nft.token_id || nft.id?.tokenId
+        const rawTokenId = nft.tokenId || nft.token_id || nft.id?.tokenId
         
-        console.log("[v0] Extracted contract address:", contractAddress)
-        console.log("[v0] Extracted token ID:", tokenId)
-        console.log("[v0] Token ID type:", typeof tokenId)
-        
-        if (!contractAddress || !tokenId) {
-          console.error("[v0] ERROR: Missing contract or tokenId")
-          console.error("[v0] Contract:", contractAddress)
-          console.error("[v0] TokenId:", tokenId)
+        if (!contractAddress || !rawTokenId) {
           throw new Error("Missing contract address or token ID")
         }
 
+        const numericTokenId = typeof rawTokenId === "string"
+          ? parseInt(rawTokenId, 16).toString() // convert hex to decimal
+          : rawTokenId.toString()
+
         const normalizedContract = contractAddress.toLowerCase()
         const normalizedRecipient = recipient.toLowerCase()
-        const normalizedTokenId = typeof tokenId === 'string' ? tokenId : tokenId.toString()
         
-        const tokenFormats = [
-          `eip155:8453/erc721:${normalizedContract}/${normalizedTokenId}`,
-          `eip155:8453:erc721:${normalizedContract}:${normalizedTokenId}`,
-          `eip155:8453/erc721/${normalizedContract}/${normalizedTokenId}`
-        ]
+        const tokenCAIP = `eip155:8453/erc721:${normalizedContract}/${numericTokenId}`
         
-        console.log("[v0] Trying CAIP-19 formats:")
-        tokenFormats.forEach((format, i) => console.log(`  [${i}]:`, format))
-
-        let lastError = null
+        console.log("[v0] Token CAIP-19:", tokenCAIP)
+        console.log("[v0] Sending to:", normalizedRecipient)
         
-        for (let i = 0; i < tokenFormats.length; i++) {
-          const tokenCAIP = tokenFormats[i]
-          console.log(`[v0] ========== ATTEMPT ${i + 1}/${tokenFormats.length} ==========`)
-          console.log("[v0] Token CAIP-19:", tokenCAIP)
-          console.log("[v0] Recipient:", normalizedRecipient)
-          console.log("[v0] Amount:", "1")
-          
-          try {
-            console.log("[v0] Calling sdk.actions.sendToken...")
-            const result = await sdk.actions.sendToken({
-              token: tokenCAIP,
-              amount: "1",
-              recipientAddress: normalizedRecipient
-            })
+        const result = await sdk.actions.sendToken({
+          token: tokenCAIP,
+          amount: "1",
+          recipientAddress: normalizedRecipient
+        })
 
-            console.log("[v0] Send result:", JSON.stringify(result, null, 2))
-            console.log("[v0] Result.success:", result.success)
+        console.log("[v0] Send result:", result)
 
-            if (result.success) {
-              console.log("[v0] ✅ NFT SENT SUCCESSFULLY!")
-              console.log("[v0] Transaction:", result.send?.transaction)
-              break // Success, exit format loop
-            } else {
-              console.error("[v0] ❌ Send failed")
-              console.error("[v0] Reason:", result.reason)
-              console.error("[v0] Error:", result.error)
-              lastError = new Error(`${result.reason}: ${result.error?.message || 'Unknown error'}`)
-            }
-          } catch (error: any) {
-            console.error(`[v0] ❌ Exception on attempt ${i + 1}:`, error)
-            console.error("[v0] Error name:", error?.name)
-            console.error("[v0] Error message:", error?.message)
-            console.error("[v0] Error stack:", error?.stack)
-            lastError = error
-            
-            if (i === tokenFormats.length - 1) {
-              throw lastError
-            }
-            console.log(`[v0] Trying next format...`)
-          }
+        if (!result.success) {
+          throw new Error(result.error?.message || "Failed to send NFT")
         }
       }
 
-      console.log("[v0] ========== ALL NFTs SENT ==========")
+      console.log("[v0] All NFTs sent successfully")
       setStep("success")
     } catch (error: any) {
-      console.error("[v0] ========== FATAL ERROR ==========")
-      console.error("[v0] Error object:", error)
-      console.error("[v0] Error message:", error?.message)
-      console.error("[v0] Error stack:", error?.stack)
-      const errorMsg = error?.message || "Unknown error"
-      alert(`Error sending NFT: ${errorMsg}`)
+      console.error("[v0] Error sending NFT:", error)
+      alert(`Error sending NFT: ${error?.message || "Unknown error"}`)
       setIsSending(false)
       return
     }
