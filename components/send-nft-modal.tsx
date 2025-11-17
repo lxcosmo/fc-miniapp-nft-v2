@@ -28,7 +28,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
   const [searchResults, setSearchResults] = useState<FarcasterUser[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isSending, setIsSending] = useState(false)
-  const { walletAddress } = useFarcaster()
+  const { walletAddress, sdk } = useFarcaster()
 
   const myVerifiedAddresses = [walletAddress].filter(Boolean)
 
@@ -150,18 +150,29 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
   }
 
   const handleSend = async () => {
+    console.log("[v0] handleSend called")
+    console.log("[v0] SDK available:", !!sdk)
+    console.log("[v0] SDK actions:", !!sdk?.actions)
+    console.log("[v0] sendToken function:", !!sdk?.actions?.sendToken)
+    
     setIsSending(true)
-    console.log("[v0] Starting NFT send...")
 
     try {
-      const sdk = (await import("@farcaster/frame-sdk")).default
+      if (!sdk) {
+        console.error("[v0] SDK not available in context")
+        alert("Farcaster SDK not initialized. Please refresh and try again.")
+        setIsSending(false)
+        return
+      }
 
       if (!sdk?.actions?.sendToken) {
-        console.error("SDK not initialized or sendToken not supported in this context.")
+        console.error("[v0] sendToken not available on SDK")
         alert("Mini app must be opened in Warpcast with connected wallet.")
         setIsSending(false)
         return
       }
+
+      console.log("[v0] Processing", nftData?.length || 0, "NFTs")
 
       for (const nft of nftData || []) {
         console.log("[v0] Processing NFT:", nft)
@@ -169,21 +180,29 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         const contractAddress = nft.contract?.address || nft.contractAddress || nft.contract_address
         const rawTokenId = nft.tokenId || nft.token_id || nft.id?.tokenId
         
+        console.log("[v0] Contract address:", contractAddress)
+        console.log("[v0] Raw token ID:", rawTokenId, "type:", typeof rawTokenId)
+        
         if (!contractAddress || !rawTokenId) {
+          console.error("[v0] Missing data - contract:", contractAddress, "tokenId:", rawTokenId)
           throw new Error("Missing contract address or token ID")
         }
 
-        const numericTokenId = typeof rawTokenId === "string"
-          ? parseInt(rawTokenId, 16).toString() // convert hex to decimal
-          : rawTokenId.toString()
+        const numericTokenId = 
+          typeof rawTokenId === "string" && rawTokenId.startsWith("0x")
+            ? BigInt(rawTokenId).toString() // Convert hex to decimal
+            : rawTokenId.toString() // Already decimal
+
+        console.log("[v0] Numeric token ID:", numericTokenId)
 
         const normalizedContract = contractAddress.toLowerCase()
         const normalizedRecipient = recipient.toLowerCase()
         
-        const tokenCAIP = `eip155:8453/erc721:${normalizedContract}/${numericTokenId}`
+        const tokenCAIP = `eip155:8453:erc721:${normalizedContract}:${numericTokenId}`
         
         console.log("[v0] Token CAIP-19:", tokenCAIP)
-        console.log("[v0] Sending to:", normalizedRecipient)
+        console.log("[v0] Recipient:", normalizedRecipient)
+        console.log("[v0] Calling sdk.actions.sendToken...")
         
         const result = await sdk.actions.sendToken({
           token: tokenCAIP,
@@ -194,6 +213,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         console.log("[v0] Send result:", result)
 
         if (!result.success) {
+          console.error("[v0] Send failed:", result.error)
           throw new Error(result.error?.message || "Failed to send NFT")
         }
       }
@@ -202,6 +222,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
       setStep("success")
     } catch (error: any) {
       console.error("[v0] Error sending NFT:", error)
+      console.error("[v0] Error stack:", error?.stack)
       alert(`Error sending NFT: ${error?.message || "Unknown error"}`)
       setIsSending(false)
       return
