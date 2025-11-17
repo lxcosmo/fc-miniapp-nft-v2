@@ -152,8 +152,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
   const handleSend = async () => {
     console.log("[v0] handleSend called")
-    console.log("[v0] Active SDK available:", !!sdk)
-    console.log("[v0] SDK actions:", !!sdk?.actions)
+    console.log("[v0] SDK available:", !!sdk)
     console.log("[v0] sendToken function:", !!sdk?.actions?.sendToken)
     
     setIsSending(true)
@@ -192,7 +191,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         const normalizedContract = contractAddress.toLowerCase()
         const normalizedRecipient = recipient.toLowerCase()
         
-        const tokenCAIP = `eip155:8453:erc721:${normalizedContract}:${numericTokenId}`
+        const tokenCAIP = `eip155:8453/erc721:${normalizedContract}/${numericTokenId}`
         
         console.log("[v0] Token CAIP-19:", tokenCAIP)
         console.log("[v0] Recipient:", normalizedRecipient)
