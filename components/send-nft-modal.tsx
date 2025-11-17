@@ -439,8 +439,19 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                 </Button>
                 <Button 
                   onClick={() => {
-                    console.log("[v0] Send button CLICKED in confirm step")
+                    console.log("[v0] ============================================")
+                    console.log("[v0] SEND BUTTON CLICKED!!!")
+                    console.log("[v0] ============================================")
+                    console.log("[v0] Current step:", step)
+                    console.log("[v0] Is sending:", isSending)
+                    console.log("[v0] Recipient:", recipient)
+                    console.log("[v0] NFT data:", nftData)
+                    console.log("[v0] Wallet address:", walletAddress)
+                    console.log("[v0] SDK object:", farcasterSdk)
+                    console.log("[v0] SDK.actions:", farcasterSdk?.actions)
+                    console.log("[v0] SDK.actions.sendTransaction:", farcasterSdk?.actions?.sendTransaction)
                     console.log("[v0] About to call handleSend...")
+                    
                     handleSend()
                   }} 
                   className="bg-primary" 
