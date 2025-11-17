@@ -175,25 +175,45 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
     setIsSending(true)
 
     try {
+      console.log("[v0] ====== SEND PROCESS STARTED ======")
+      console.log("[v0] farcasterSdk:", farcasterSdk)
+      console.log("[v0] farcasterSdk.wallet:", farcasterSdk?.wallet)
+      console.log("[v0] farcasterSdk.wallet.ethProvider:", farcasterSdk?.wallet?.ethProvider)
+      
+      const provider = farcasterSdk.wallet.ethProvider
+      
+      if (!provider) {
+        throw new Error("Ethereum provider not available. Please open this app in Warpcast.")
+      }
+
+      console.log("[v0] Provider available:", !!provider)
+      console.log("[v0] Provider request method:", typeof provider.request)
+      
       const normalizedRecipient = recipient.toLowerCase()
       
       if (!normalizedRecipient.startsWith("0x")) {
         throw new Error("Invalid recipient address")
       }
 
-      if (!farcasterSdk?.actions?.sendTransaction) {
-        throw new Error("SDK sendTransaction not available")
-      }
-
       if (!walletAddress) {
         throw new Error("Wallet not connected")
       }
+
+      console.log("[v0] Wallet address:", walletAddress)
+      console.log("[v0] Recipient:", normalizedRecipient)
+      console.log("[v0] NFTs to send:", nftData?.length)
 
       for (const nft of nftData || []) {
         const contractAddress = nft.contractAddress || nft.contract?.address || nft.contract_address
         const rawTokenId = nft.tokenId || nft.token_id || nft.id?.tokenId
         
+        console.log("[v0] ====== Processing NFT ======")
+        console.log("[v0] NFT object:", nft)
+        console.log("[v0] Contract address:", contractAddress)
+        console.log("[v0] Raw token ID:", rawTokenId)
+        
         if (!contractAddress || !rawTokenId) {
+          console.error("[v0] Missing data - contract:", contractAddress, "tokenId:", rawTokenId)
           throw new Error("Missing contract address or token ID")
         }
 
@@ -205,6 +225,8 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
           tokenIdHex = "0x" + BigInt(rawTokenId).toString(16)
         }
 
+        console.log("[v0] Token ID hex:", tokenIdHex)
+
         // Encode safeTransferFrom(address from, address to, uint256 tokenId)
         const functionSelector = "0x42842e0e"
         const fromPadded = walletAddress.slice(2).padStart(64, '0')
@@ -212,22 +234,53 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
         const tokenIdPadded = tokenIdHex.slice(2).padStart(64, '0')
         const encodedData = functionSelector + fromPadded + toPadded + tokenIdPadded
 
-        const result = await farcasterSdk.actions.sendTransaction({
-          chainId: "eip155:8453",
+        console.log("[v0] ====== Transaction Details ======")
+        console.log("[v0] Function selector:", functionSelector)
+        console.log("[v0] From (padded):", fromPadded)
+        console.log("[v0] To (padded):", toPadded)
+        console.log("[v0] TokenId (padded):", tokenIdPadded)
+        console.log("[v0] Full encoded data:", encodedData)
+        console.log("[v0] Data length:", encodedData.length)
+
+        const txParams = {
+          from: walletAddress,
           to: contractAddress,
           data: encodedData,
-          value: "0"
-        })
+          value: '0x0'
+        }
 
-        if (!result.transactionHash) {
-          throw new Error("Transaction failed - no hash returned")
+        console.log("[v0] Transaction params:", txParams)
+        console.log("[v0] Calling eth_sendTransaction...")
+
+        try {
+          const txHash = await provider.request({
+            method: 'eth_sendTransaction',
+            params: [txParams]
+          })
+
+          console.log("[v0] Transaction hash received:", txHash)
+
+          if (!txHash) {
+            throw new Error("Transaction failed - no hash returned")
+          }
+          
+          console.log("[v0] ✅ NFT sent successfully!")
+        } catch (providerError: any) {
+          console.error("[v0] Provider error:", providerError)
+          console.error("[v0] Provider error message:", providerError?.message)
+          console.error("[v0] Provider error code:", providerError?.code)
+          throw providerError
         }
       }
 
+      console.log("[v0] ====== ALL NFTS SENT ======")
       setStep("success")
     } catch (error: any) {
+      console.error("[v0] ====== SEND FAILED ======")
       console.error("[v0] Send error:", error)
-      alert(`Error: ${error?.message || "Unknown error"}`)
+      console.error("[v0] Error message:", error?.message)
+      console.error("[v0] Error stack:", error?.stack)
+      alert(`Error sending NFT: ${error?.message || "Unknown error"}`)
     } finally {
       setIsSending(false)
     }
