@@ -172,57 +172,32 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
   }
 
   const handleSend = async () => {
-    console.log("[v0] ====== handleSend CALLED ======")
-    
     setIsSending(true)
 
     try {
-      let normalizedRecipient = recipient.toLowerCase()
+      const normalizedRecipient = recipient.toLowerCase()
       
       if (!normalizedRecipient.startsWith("0x")) {
-        console.error("[v0] ERROR: Recipient is not an address:", recipient)
-        alert("Please select a user from the list or enter a valid 0x address")
-        setIsSending(false)
-        return
+        throw new Error("Invalid recipient address")
       }
 
-      const activeSdk = farcasterSdk
-      
-      console.log("[v0] Using SDK:", activeSdk)
-      console.log("[v0] SDK has sendTransaction:", !!activeSdk?.actions?.sendTransaction)
-
-      if (!activeSdk?.actions?.sendTransaction) {
-        console.error("[v0] ERROR: sendTransaction not available on SDK")
-        console.error("[v0] Available SDK methods:", Object.keys(activeSdk?.actions || {}))
-        alert("Mini app must be opened in Warpcast with connected wallet.")
-        setIsSending(false)
-        return
+      if (!farcasterSdk?.actions?.sendTransaction) {
+        throw new Error("SDK sendTransaction not available")
       }
 
       if (!walletAddress) {
-        console.error("[v0] ERROR: Wallet address not available")
-        alert("Wallet not connected")
-        setIsSending(false)
-        return
+        throw new Error("Wallet not connected")
       }
 
-      console.log("[v0] Processing", nftData?.length || 0, "NFTs")
-
       for (const nft of nftData || []) {
-        console.log("[v0] ====== Processing NFT ======")
-        
         const contractAddress = nft.contractAddress || nft.contract?.address || nft.contract_address
         const rawTokenId = nft.tokenId || nft.token_id || nft.id?.tokenId
         
-        console.log("[v0] Contract address:", contractAddress)
-        console.log("[v0] Raw token ID:", rawTokenId)
-        
         if (!contractAddress || !rawTokenId) {
-          console.error("[v0] ERROR: Missing contract or tokenId")
           throw new Error("Missing contract address or token ID")
         }
 
-        // Convert tokenId to hex format for encoding
+        // Convert tokenId to hex
         let tokenIdHex: string
         if (typeof rawTokenId === "string" && rawTokenId.startsWith("0x")) {
           tokenIdHex = rawTokenId
@@ -230,66 +205,32 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
           tokenIdHex = "0x" + BigInt(rawTokenId).toString(16)
         }
 
-        console.log("[v0] Token ID hex:", tokenIdHex)
-        console.log("[v0] From:", walletAddress)
-        console.log("[v0] To:", normalizedRecipient)
-
         // Encode safeTransferFrom(address from, address to, uint256 tokenId)
-        // Function selector: 0x42842e0e
         const functionSelector = "0x42842e0e"
-        
-        // Pad addresses to 32 bytes (64 hex chars)
         const fromPadded = walletAddress.slice(2).padStart(64, '0')
         const toPadded = normalizedRecipient.slice(2).padStart(64, '0')
         const tokenIdPadded = tokenIdHex.slice(2).padStart(64, '0')
-        
         const encodedData = functionSelector + fromPadded + toPadded + tokenIdPadded
-        
-        console.log("[v0] ====== Encoded transaction data ======")
-        console.log("[v0] Function selector:", functionSelector)
-        console.log("[v0] From (padded):", fromPadded)
-        console.log("[v0] To (padded):", toPadded)
-        console.log("[v0] TokenId (padded):", tokenIdPadded)
-        console.log("[v0] Full encoded data:", encodedData)
 
-        console.log("[v0] ====== Sending transaction via SDK ======")
-        
-        try {
-          const result = await activeSdk.actions.sendTransaction({
-            chainId: "eip155:8453",
-            to: contractAddress,
-            data: encodedData,
-            value: "0"
-          })
+        const result = await farcasterSdk.actions.sendTransaction({
+          chainId: "eip155:8453",
+          to: contractAddress,
+          data: encodedData,
+          value: "0"
+        })
 
-          console.log("[v0] Transaction result:", result)
-          console.log("[v0] Transaction hash:", result?.transactionHash)
-
-          if (!result.transactionHash) {
-            console.error("[v0] No transaction hash returned")
-            throw new Error("Transaction failed - no hash returned")
-          }
-          
-          console.log("[v0] ✅ NFT sent successfully!")
-          console.log("[v0] View on Basescan: https://basescan.org/tx/" + result.transactionHash)
-        } catch (txError: any) {
-          console.error("[v0] sendTransaction threw exception:", txError)
-          console.error("[v0] Error message:", txError?.message)
-          throw txError
+        if (!result.transactionHash) {
+          throw new Error("Transaction failed - no hash returned")
         }
       }
 
-      console.log("[v0] ====== All NFTs sent successfully ======")
       setStep("success")
     } catch (error: any) {
-      console.error("[v0] ====== ERROR in handleSend ======")
-      console.error("[v0] Error:", error)
-      alert(`Error sending NFT: ${error?.message || "Unknown error"}`)
+      console.error("[v0] Send error:", error)
+      alert(`Error: ${error?.message || "Unknown error"}`)
+    } finally {
       setIsSending(false)
-      return
     }
-    
-    setIsSending(false)
   }
 
   const handleClose = () => {
@@ -438,22 +379,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                   Back
                 </Button>
                 <Button 
-                  onClick={() => {
-                    console.log("[v0] ============================================")
-                    console.log("[v0] SEND BUTTON CLICKED!!!")
-                    console.log("[v0] ============================================")
-                    console.log("[v0] Current step:", step)
-                    console.log("[v0] Is sending:", isSending)
-                    console.log("[v0] Recipient:", recipient)
-                    console.log("[v0] NFT data:", nftData)
-                    console.log("[v0] Wallet address:", walletAddress)
-                    console.log("[v0] SDK object:", farcasterSdk)
-                    console.log("[v0] SDK.actions:", farcasterSdk?.actions)
-                    console.log("[v0] SDK.actions.sendTransaction:", farcasterSdk?.actions?.sendTransaction)
-                    console.log("[v0] About to call handleSend...")
-                    
-                    handleSend()
-                  }} 
+                  onClick={handleSend} 
                   className="bg-primary" 
                   disabled={isSending}
                 >
