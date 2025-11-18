@@ -63,7 +63,14 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
           <div className="space-y-3">
             <div className="flex justify-between items-start">
               <span className="text-sm text-muted-foreground">Collection</span>
-              <span className="text-sm font-medium text-foreground text-right">{nft.collection}</span>
+              <a
+                href={`https://opensea.io/assets?search[query]=${nft.contractAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-primary hover:underline text-right truncate ml-4"
+              >
+                {nft.collection}
+              </a>
             </div>
             <div className="flex justify-between items-start border-t border-border pt-3">
               <span className="text-sm text-muted-foreground">Token ID</span>
@@ -124,7 +131,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
             </Button>
           </div>
           <Button variant="outline" className="w-full bg-transparent" onClick={handleHide}>
-            {nft.isHiddenPage ? "Unhide" : "Hide"}
+            {nft.isHiddenPage ? "Unhide" : "Hide NFT"}
           </Button>
         </div>
       </div>
