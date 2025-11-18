@@ -116,12 +116,31 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
 
         if (data.result?.users && data.result.users.length > 0) {
           const users = data.result.users.map((user: any) => {
+            let ethAddress = null
+            
+            if (user.verified_addresses?.eth_addresses && user.verified_addresses.eth_addresses.length > 0) {
+              // Try to find primary address
+              const primaryAddress = user.verified_addresses.eth_addresses.find((addr: any) => addr.primary === true)
+              if (primaryAddress) {
+                ethAddress = typeof primaryAddress === 'string' ? primaryAddress : primaryAddress.address
+              } else {
+                // Use first verified address
+                const firstAddress = user.verified_addresses.eth_addresses[0]
+                ethAddress = typeof firstAddress === 'string' ? firstAddress : firstAddress.address
+              }
+            }
+            
+            // Fallback to custody address if no verified addresses
+            if (!ethAddress) {
+              ethAddress = user.custody_address
+            }
+            
             return {
               fid: user.fid,
               username: user.username,
               displayName: user.display_name || user.username,
               pfpUrl: user.pfp_url,
-              ethAddress: user.custody_address
+              ethAddress: ethAddress
             }
           }).filter((u: FarcasterUser) => u.ethAddress)
           
@@ -296,7 +315,7 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                           </div>
                           {user.ethAddress && (
                             <div className="text-right">
-                              <p className="text-xs text-muted-foreground">Verified address</p>
+                              <p className="text-xs text-muted-foreground">Farcaster Wallet</p>
                               <p className="text-xs text-muted-foreground font-mono">
                                 {user.ethAddress.slice(0, 6)}...{user.ethAddress.slice(-4)}
                               </p>
