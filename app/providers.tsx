@@ -66,6 +66,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
           console.log("[v0] User object:", frameContext?.user)
           console.log("[v0] Custody address:", frameContext?.user?.custody_address)
           console.log("[v0] Verified addresses:", frameContext?.user?.verified_addresses)
+          console.log("[v0] Verified addresses FULL STRUCTURE:", JSON.stringify(frameContext?.user?.verified_addresses, null, 2))
 
           const address =
             frameContext?.user?.custody_address || frameContext?.user?.verified_addresses?.eth_addresses?.[0]
