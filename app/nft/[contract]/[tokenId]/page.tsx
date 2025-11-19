@@ -18,6 +18,15 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
   const nftDataString = searchParams.get("data")
   const nft = nftDataString ? JSON.parse(decodeURIComponent(nftDataString)) : null
 
+  const handleSetAvatar = () => {
+    if (!nft || !sdk) return
+    
+    // Ensure we use the correct CAIP-19 format: eip155:8453/erc721:contract/tokenId
+    const tokenCAIP = `eip155:8453/erc721:${nft.contractAddress}/${nft.tokenId}`
+    
+    sdk.actions.viewToken({ token: tokenCAIP })
+  }
+
   const handleHide = () => {
     if (!nft) return
 
@@ -94,29 +103,24 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
         <Card className="p-3 mb-6 bg-card border-border">
           <h3 className="text-sm font-medium text-foreground mb-2">View on marketplaces</h3>
           <div className="space-y-1">
-            <div className="flex items-center justify-between p-2 rounded hover:bg-muted transition-colors">
-              <button
-                onClick={() => sdk?.actions.openUrl(`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`)}
-                className="text-sm text-foreground hover:underline"
-              >
-                OpenSea
-              </button>
-              <span className="text-muted-foreground">|</span>
-              <a
-                href={`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
+            <button
+              onClick={() => sdk?.actions.openUrl(`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`)}
+              className="w-full flex items-center justify-between p-2 rounded hover:bg-muted transition-colors text-left"
+            >
+              <span className="text-sm text-foreground hover:underline">OpenSea</span>
+              <ExternalLink className="w-4 h-4 text-muted-foreground" />
+            </button>
           </div>
         </Card>
 
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">List for sale</Button>
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={handleSetAvatar}
+            >
+              Set as avatar
+            </Button>
             <Button
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={() => setShowSendModal(true)}
