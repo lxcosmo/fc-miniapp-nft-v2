@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { SendNFTModal } from "@/components/send-nft-modal"
 import { useState } from "react"
 import { useFarcaster } from "@/app/providers"
@@ -95,38 +95,21 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
           <h3 className="text-sm font-medium text-foreground mb-2">View on marketplaces</h3>
           <div className="space-y-1">
             <div className="flex items-center justify-between p-2 rounded hover:bg-muted transition-colors">
-              <div className="flex items-center">
-                <button
-                  onClick={() => sdk?.actions.openUrl(`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`)}
-                  className="text-sm text-foreground hover:underline"
-                >
-                  OpenSea
-                </button>
-                <span className="mx-2 text-muted-foreground">|</span>
-                <a
-                  href={`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                    />
-                  </svg>
-                </a>
-              </div>
-              <Button
-                size="sm"
-                className="bg-white text-black hover:bg-gray-200 h-7 text-xs px-3 font-medium"
-                onClick={() => sdk?.actions.openUrl("https://opensea.io/login")}
+              <button
+                onClick={() => sdk?.actions.openUrl(`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`)}
+                className="text-sm text-foreground hover:underline"
               >
-                Connect
-              </Button>
+                OpenSea
+              </button>
+              <span className="text-muted-foreground">|</span>
+              <a
+                href={`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </Card>
