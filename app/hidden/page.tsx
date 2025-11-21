@@ -3,8 +3,8 @@ import { NFTGrid } from "@/components/nft-grid"
 import { useFarcaster } from "@/app/providers"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { useRouter } from "next/navigation"
+import { ArrowLeft } from "lucide-react"
 
 export default function HiddenPage() {
   const { isSDKLoaded } = useFarcaster()
@@ -35,17 +35,17 @@ export default function HiddenPage() {
     console.log("[v0] Unhiding NFTs:", selectedNFTs)
     const hiddenNFTs = JSON.parse(localStorage.getItem("hidden_nfts") || "[]")
     const updatedHidden = hiddenNFTs.filter((id: string) => !selectedNFTs.includes(id))
-    
+
     console.log("[v0] Previous hidden:", hiddenNFTs)
     console.log("[v0] New hidden:", updatedHidden)
-    
+
     localStorage.setItem("hidden_nfts", JSON.stringify(updatedHidden))
-    
+
     // Update local state immediately
     setHiddenCount(updatedHidden.length)
     setSelectedNFTs([])
     setIsSelectionMode(false)
-    
+
     // Force page refresh to reload NFTs
     window.location.reload()
   }
@@ -125,11 +125,11 @@ export default function HiddenPage() {
       {isSelectionMode && selectedNFTs.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4">
           <div className="max-w-6xl mx-auto grid grid-cols-2 gap-3">
+            <Button variant="outline" onClick={handleUnhideSelected} className="bg-background text-foreground">
+              Unhide ({selectedNFTs.length})
+            </Button>
             <Button onClick={handleSendSelected} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Send ({selectedNFTs.length})
-            </Button>
-            <Button onClick={handleUnhideSelected} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Unhide ({selectedNFTs.length})
             </Button>
           </div>
         </div>

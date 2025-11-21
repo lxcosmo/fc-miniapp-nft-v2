@@ -18,32 +18,6 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
   const nftDataString = searchParams.get("data")
   const nft = nftDataString ? JSON.parse(decodeURIComponent(nftDataString)) : null
 
-  const handleSetAvatar = async () => {
-    if (!nft || !sdk) {
-      console.log("[v0] Cannot set avatar - missing nft or sdk")
-      return
-    }
-
-    console.log("[v0] Setting avatar for NFT:", nft.contractAddress, nft.tokenId)
-
-    // Format: eip155:8453/erc721:0x.../tokenId
-    const tokenCAIP = `eip155:8453/erc721:${nft.contractAddress.toLowerCase()}/${nft.tokenId}`
-    console.log("[v0] Token CAIP-19:", tokenCAIP)
-
-    try {
-      if (sdk.actions && sdk.actions.viewToken) {
-        console.log("[v0] Calling sdk.actions.viewToken")
-        await sdk.actions.viewToken({ token: tokenCAIP })
-      } else {
-        console.error("[v0] sdk.actions.viewToken not available")
-        alert("Set as avatar is only available in Warpcast")
-      }
-    } catch (error: any) {
-      console.error("[v0] Error setting avatar:", error)
-      alert(`Failed to open NFT viewer: ${error.message || JSON.stringify(error)}`)
-    }
-  }
-
   const handleHide = () => {
     if (!nft) return
 
@@ -134,8 +108,8 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
 
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleSetAvatar}>
-              Set as avatar
+            <Button variant="outline" className="w-full bg-background text-foreground" onClick={handleHide}>
+              {nft.isHiddenPage ? "Unhide" : "Hide NFT"}
             </Button>
             <Button
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -144,9 +118,6 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
               Send
             </Button>
           </div>
-          <Button variant="outline" className="w-full bg-transparent" onClick={handleHide}>
-            {nft.isHiddenPage ? "Unhide" : "Hide NFT"}
-          </Button>
         </div>
       </div>
 

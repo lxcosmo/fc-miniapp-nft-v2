@@ -108,11 +108,11 @@ export default function Page() {
       {isSelectionMode && selectedNFTs.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4">
           <div className="max-w-6xl mx-auto grid grid-cols-2 gap-3">
+            <Button variant="outline" onClick={handleHideSelected} className="bg-background text-foreground">
+              Hide ({selectedNFTs.length})
+            </Button>
             <Button onClick={handleSendSelected} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Send ({selectedNFTs.length})
-            </Button>
-            <Button onClick={handleHideSelected} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Hide ({selectedNFTs.length})
             </Button>
           </div>
         </div>
