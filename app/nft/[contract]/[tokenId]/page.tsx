@@ -3,8 +3,8 @@
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, ExternalLink } from 'lucide-react'
+import { useRouter, useSearchParams } from "next/navigation"
+import { ArrowLeft, ExternalLink } from "lucide-react"
 import { SendNFTModal } from "@/components/send-nft-modal"
 import { useState } from "react"
 import { useFarcaster } from "@/app/providers"
@@ -23,13 +23,13 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
       console.log("[v0] Cannot set avatar - missing nft or sdk")
       return
     }
-    
+
     console.log("[v0] Setting avatar for NFT:", nft.contractAddress, nft.tokenId)
-    
+
     // Format: eip155:8453/erc721:0x.../tokenId
     const tokenCAIP = `eip155:8453/erc721:${nft.contractAddress.toLowerCase()}/${nft.tokenId}`
     console.log("[v0] Token CAIP-19:", tokenCAIP)
-    
+
     try {
       if (sdk.actions && sdk.actions.viewToken) {
         console.log("[v0] Calling sdk.actions.viewToken")
@@ -38,9 +38,9 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
         console.error("[v0] sdk.actions.viewToken not available")
         alert("Set as avatar is only available in Warpcast")
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("[v0] Error setting avatar:", error)
-      alert("Failed to open NFT viewer")
+      alert(`Failed to open NFT viewer: ${error.message || JSON.stringify(error)}`)
     }
   }
 
@@ -121,7 +121,9 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
           <h3 className="text-sm font-medium text-foreground mb-2">View on marketplaces</h3>
           <div className="space-y-1">
             <button
-              onClick={() => sdk?.actions.openUrl(`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`)}
+              onClick={() =>
+                sdk?.actions.openUrl(`https://opensea.io/assets/base/${nft.contractAddress}/${nft.tokenId}`)
+              }
               className="w-full flex items-center justify-between p-2 rounded hover:bg-muted transition-colors text-left"
             >
               <span className="text-sm text-foreground hover:underline">OpenSea</span>
@@ -132,10 +134,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
 
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <Button 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              onClick={handleSetAvatar}
-            >
+            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleSetAvatar}>
               Set as avatar
             </Button>
             <Button
