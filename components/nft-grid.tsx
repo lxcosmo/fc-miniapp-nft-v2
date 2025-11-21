@@ -206,7 +206,7 @@ export function NFTGrid({
           return (
             <Card
               key={nft.id}
-              className={`overflow-hidden border-border hover:shadow-lg transition-shadow cursor-pointer bg-card relative ${isSelected ? "ring-2 ring-primary" : ""}`}
+              className={`overflow-hidden border-border hover:shadow-lg transition-shadow cursor-pointer bg-card relative ${isSelected ? "ring-2 ring-primary" : ""} p-0`}
               onClick={() => handleNFTClick(nft)}
               onContextMenu={(e) => {
                 e.preventDefault()
@@ -244,7 +244,7 @@ export function NFTGrid({
         return (
           <Card
             key={nft.id}
-            className={`overflow-hidden border-border hover:shadow-lg transition-shadow cursor-pointer bg-card relative ${isSelected ? "ring-2 ring-primary" : ""} p-0`}
+            className={`overflow-hidden border-border hover:shadow-lg transition-shadow cursor-pointer bg-card relative ${isSelected ? "ring-2 ring-primary" : ""}`}
             onClick={() => handleNFTClick(nft)}
             onContextMenu={(e) => {
               e.preventDefault()
@@ -266,18 +266,18 @@ export function NFTGrid({
             <div className="aspect-square relative bg-muted">
               <Image src={nft.image || "/placeholder.svg"} alt={nft.name} fill className="object-cover" />
               {gridMode === 2 && (
-                <div className="absolute bottom-1 left-1 bg-black/20 rounded px-1.5 py-0.5 max-w-[90%] backdrop-blur-[2px]">
+                <div className="absolute bottom-1 left-1 bg-black/10 rounded px-1.5 py-0.5 max-w-[90%] backdrop-blur-[2px]">
                   <p className="text-[10px] text-white truncate font-medium leading-tight">{nft.collection}</p>
                   <p className="text-[10px] text-white truncate font-medium leading-tight">{nft.name}</p>
                 </div>
               )}
               {gridMode === 3 && (
-                <div className="absolute bottom-1 left-1 bg-black/20 rounded px-1.5 py-0.5 max-w-[90%] backdrop-blur-[2px]">
+                <div className="absolute bottom-1 left-1 bg-black/10 rounded px-1.5 py-0.5 max-w-[90%] backdrop-blur-[2px]">
                   <p className="text-[8px] text-white truncate font-medium leading-tight">{nft.collection}</p>
                 </div>
               )}
               {gridMode === 4 && (
-                <div className="absolute bottom-1 left-1 bg-black/20 rounded px-1.5 py-0.5 max-w-[90%] backdrop-blur-[2px]">
+                <div className="absolute bottom-1 left-1 bg-black/10 rounded px-1.5 py-0.5 max-w-[90%] backdrop-blur-[2px]">
                   <p className="text-[8px] text-white truncate font-medium leading-tight">{nft.collection}</p>
                 </div>
               )}
