@@ -4,8 +4,8 @@ import { Card } from "@/components/ui/card"
 import Image from "next/image"
 import { useFarcaster } from "@/app/providers"
 import { useEffect, useState } from "react"
-import { useRouter } from 'next/navigation'
-import { Check } from 'lucide-react'
+import { useRouter } from "next/navigation"
+import { Check } from "lucide-react"
 
 interface NFT {
   id: string
@@ -71,24 +71,25 @@ export function NFTGrid({
 
           const formattedNFTs = allNFTs.map((nft: any) => {
             const nftId = `${nft.contract.address}-${nft.tokenId}`
-            
-            const tokenIdNum = parseInt(nft.tokenId, 16)
+
+            const tokenIdNum = Number.parseInt(nft.tokenId, 16)
             if (tokenIdNum === 0 && !hiddenNFTs.includes(nftId)) {
               console.log(`[v0] Auto-hiding NFT with tokenId = 0: ${nftId}`)
               hiddenNFTs.push(nftId)
             }
-            
-            const isSpam = nft.contract.isSpam || 
-                          nft.spam?.isSpam || 
-                          nft.name?.toLowerCase().includes('claim') ||
-                          nft.name?.toLowerCase().includes('reward') ||
-                          nft.name?.toLowerCase().includes('airdrop')
-                          
+
+            const isSpam =
+              nft.contract.isSpam ||
+              nft.spam?.isSpam ||
+              nft.name?.toLowerCase().includes("claim") ||
+              nft.name?.toLowerCase().includes("reward") ||
+              nft.name?.toLowerCase().includes("airdrop")
+
             if (isSpam && !hiddenNFTs.includes(nftId)) {
               console.log(`[v0] Auto-hiding spam NFT: ${nft.name}`)
               hiddenNFTs.push(nftId)
             }
-            
+
             return {
               id: nftId,
               name: nft.name || nft.contract.name || "Unnamed NFT",
@@ -225,7 +226,7 @@ export function NFTGrid({
                 </div>
               )}
               <div className="flex items-center gap-2 p-2">
-                <div className="w-14 h-14 relative bg-muted rounded flex-shrink-0">
+                <div className="w-16 h-16 relative bg-muted rounded flex-shrink-0">
                   <Image src={nft.image || "/placeholder.svg"} alt={nft.name} fill className="object-cover rounded" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -241,8 +242,6 @@ export function NFTGrid({
     )
   }
 
-  const showDescriptions = gridMode === 2
-
   return (
     <div className={`grid ${gridCols} gap-3`}>
       {nfts.map((nft) => {
@@ -250,7 +249,7 @@ export function NFTGrid({
         return (
           <Card
             key={nft.id}
-            className={`overflow-hidden border-border hover:shadow-lg transition-shadow cursor-pointer bg-card relative ${isSelected ? "ring-2 ring-primary" : ""} ${!showDescriptions ? "p-0" : ""}`}
+            className={`overflow-hidden border-border hover:shadow-lg transition-shadow cursor-pointer bg-card relative ${isSelected ? "ring-2 ring-primary" : ""} p-0`}
             onClick={() => handleNFTClick(nft)}
             onContextMenu={(e) => {
               e.preventDefault()
@@ -271,14 +270,12 @@ export function NFTGrid({
             )}
             <div className="aspect-square relative bg-muted">
               <Image src={nft.image || "/placeholder.svg"} alt={nft.name} fill className="object-cover" />
+              {gridMode === 3 && (
+                <div className="absolute bottom-1 left-1 bg-black/60 rounded px-1.5 py-0.5 max-w-[90%] backdrop-blur-[2px]">
+                  <p className="text-[8px] text-white truncate font-medium leading-tight">{nft.collection}</p>
+                </div>
+              )}
             </div>
-            {showDescriptions && (
-              <div className="p-1 space-y-0">
-                <h3 className="font-semibold text-[10px] text-foreground truncate leading-tight">{nft.name}</h3>
-                <p className="text-[8px] text-muted-foreground truncate leading-tight">{nft.collection}</p>
-                <p className="text-[8px] text-muted-foreground leading-tight">Floor: {nft.floorPrice} ETH</p>
-              </div>
-            )}
           </Card>
         )
       })}
