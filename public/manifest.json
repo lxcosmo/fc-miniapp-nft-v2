@@ -1,6 +1,6 @@
 {
-  "name": "Farcaster NFT Advanced Wallet",
-  "short_name": "NFT aWallet",
+  "name": "Farcaster NFT Wallet",
+  "short_name": "NFT Wallet",
   "description": "View your ETH balance and NFT collection",
   "start_url": "/",
   "display": "standalone",

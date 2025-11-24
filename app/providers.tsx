@@ -63,28 +63,30 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
           console.log("[v0] Frame context loaded successfully")
           console.log("[v0] frameContext exists?", !!frameContext)
           console.log("[v0] frameContext.user exists?", !!frameContext?.user)
-          
+
           if (frameContext?.user) {
             console.log("[v0] === USER DATA START ===")
             console.log("[v0] custody_address:", frameContext.user.custody_address)
             console.log("[v0] verified_addresses object:", frameContext.user.verified_addresses)
-            
+
             if (frameContext.user.verified_addresses) {
               console.log("[v0] eth_addresses array:", frameContext.user.verified_addresses.eth_addresses)
-              console.log("[v0] Number of eth addresses:", frameContext.user.verified_addresses.eth_addresses?.length || 0)
-              
-              // Log each address individually
+              console.log(
+                "[v0] Number of eth addresses:",
+                frameContext.user.verified_addresses.eth_addresses?.length || 0,
+              )
+
               frameContext.user.verified_addresses.eth_addresses?.forEach((addr, index) => {
                 console.log(`[v0] eth_address[${index}]:`, addr)
               })
             }
             console.log("[v0] === USER DATA END ===")
           }
-          
+
           setContext(frameContext)
 
           const address =
-            frameContext?.user?.custody_address || frameContext?.user?.verified_addresses?.eth_addresses?.[0]
+            frameContext?.user?.verified_addresses?.eth_addresses?.[0] || frameContext?.user?.custody_address
           console.log("[v0] Final wallet address extracted:", address)
 
           if (address) {
@@ -109,6 +111,35 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
     }
 
     load()
+
+    const handleAccountsChanged = async (accounts: unknown) => {
+      console.log("[v0] Accounts changed event received:", accounts)
+      if (Array.isArray(accounts) && accounts.length > 0) {
+        const newAddress = accounts[0] as string
+        console.log("[v0] Switching to new wallet address:", newAddress)
+        setWalletAddress(newAddress)
+        setIsWalletConnected(true)
+        localStorage.setItem("farcaster_wallet_address", newAddress)
+        localStorage.setItem("farcaster_wallet_connected", "true")
+        await fetchBalance(newAddress)
+      } else {
+        console.log("[v0] No accounts available after change")
+      }
+    }
+
+    // Listen for wallet changes via EIP-1193 provider
+    if (farcasterSdk?.wallet?.ethProvider) {
+      farcasterSdk.wallet.ethProvider.on("accountsChanged", handleAccountsChanged)
+      console.log("[v0] Registered accountsChanged listener")
+    }
+
+    // Cleanup listener on unmount
+    return () => {
+      if (farcasterSdk?.wallet?.ethProvider) {
+        farcasterSdk.wallet.ethProvider.removeListener("accountsChanged", handleAccountsChanged)
+        console.log("[v0] Removed accountsChanged listener")
+      }
+    }
   }, [])
 
   const fetchBalance = async (address: string) => {
@@ -183,14 +214,14 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
 
   return (
     <FarcasterContext.Provider
-      value={{ 
-        isSDKLoaded, 
-        context, 
-        walletAddress, 
-        ethBalance, 
-        connectWallet, 
-        isWalletConnected, 
-        sdk: sdkInstance || farcasterSdk 
+      value={{
+        isSDKLoaded,
+        context,
+        walletAddress,
+        ethBalance,
+        connectWallet,
+        isWalletConnected,
+        sdk: sdkInstance || farcasterSdk,
       }}
     >
       {children}
