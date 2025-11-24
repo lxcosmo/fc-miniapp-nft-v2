@@ -20,7 +20,8 @@
       "assets",
       "wallet",
       "advaced"
-    ]
+    ],
+    "noindex": false
   },
   "accountAssociation": {
     "header": "eyJmaWQiOjQ3ODY1MSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweGRCQjlmNzZEQzI4OUI0Y2VjNThCQ2ZlMTA5MjMwODRGOTZGYTZBZWUifQ",
