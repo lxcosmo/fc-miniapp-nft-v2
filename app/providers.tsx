@@ -133,14 +133,36 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
       console.log("[v0] Registered accountsChanged listener")
     }
 
-    // Cleanup listener on unmount
+    const pollInterval = setInterval(async () => {
+      try {
+        const currentContext = await farcasterSdk.context
+        const newAddress =
+          currentContext?.user?.verified_addresses?.eth_addresses?.[0] || currentContext?.user?.custody_address
+
+        if (newAddress && newAddress !== walletAddress) {
+          console.log("[v0] Detected wallet change via polling:", { old: walletAddress, new: newAddress })
+          setWalletAddress(newAddress)
+          setIsWalletConnected(true)
+          localStorage.setItem("farcaster_wallet_address", newAddress)
+          localStorage.setItem("farcaster_wallet_connected", "true")
+          await fetchBalance(newAddress)
+
+          window.location.reload()
+        }
+      } catch (error) {
+        console.log("[v0] Error polling for wallet changes:", error)
+      }
+    }, 2000) // Poll every 2 seconds
+
+    // Cleanup listener and polling on unmount
     return () => {
+      clearInterval(pollInterval)
       if (farcasterSdk?.wallet?.ethProvider) {
         farcasterSdk.wallet.ethProvider.removeListener("accountsChanged", handleAccountsChanged)
-        console.log("[v0] Removed accountsChanged listener")
+        console.log("[v0] Removed accountsChanged listener and polling")
       }
     }
-  }, [])
+  }, [walletAddress])
 
   const fetchBalance = async (address: string) => {
     try {
