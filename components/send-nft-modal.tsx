@@ -400,6 +400,11 @@ export function SendNFTModal({ isOpen, onClose, nftIds, nftData }: SendNFTModalP
                         <p className="text-sm font-medium">{selectedUser.displayName}</p>
                         <p className="text-xs text-muted-foreground">@{selectedUser.username}</p>
                       </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground font-mono">
+                          {recipient.slice(0, 6)}...{recipient.slice(-4)}
+                        </p>
+                      </div>
                     </div>
                   ) : (
                     <p className="text-sm font-mono font-medium">
