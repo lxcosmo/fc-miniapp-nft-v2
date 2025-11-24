@@ -30,4 +30,19 @@
       "advaced"],
     "noindex": false
   }
+  "embed": {
+  "imageUrl": "https://miniapp-nft-v2.vercel.app/embed.png",
+  "title": "NFT aWallet",
+  "description": "View your NFTs and manage assets inside Farcaster.",
+  "buttons": [
+    {
+      "title": "Open Wallet",
+      "action": {
+        "type": "open_uri",
+        "uri": "https://miniapp-nft-v2.vercel.app"
+      }
+    }
+  ]
+}
+
 }
