@@ -69,7 +69,7 @@ export function WalletBalance() {
       <div className="flex items-start justify-between">
         {/* Left side - ETH Balance */}
         <div className="flex-1">
-          <p className="text-sm text-muted-foreground mb-1">Total Balance</p>
+          <p className="text-sm text-muted-foreground mb-1">Wallet Balance</p>
           {isSDKLoaded ? (
             <>
               {isWalletConnected && ethBalance !== null ? (
