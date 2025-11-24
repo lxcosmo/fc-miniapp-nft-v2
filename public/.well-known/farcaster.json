@@ -1,5 +1,13 @@
 {
-  "frame": {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjQ3ODY1MSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweGRCQjlmNzZEQzI4OUI0Y2VjNThCQ2ZlMTA5MjMwODRGOTZGYTZBZWUifQ",
+    "payload": "eyJkb21haW4iOiJtaW5pYXBwLW5mdC12Mi52ZXJjZWwuYXBwIn0",
+    "signature": "lu58Wq6fQpv9Dm7DycaUtfAI2Hdvf11+RCZ+uec61VxrQLGOUHC2SZzQP2Ja4u/3EgBiJqY7fZJWRVTWmUukKhw="
+  },
+  "baseBuilder": {
+    "ownerAddress": "0xB541481b59D97f8789998C688E640855Fe754648"
+  },
+  "miniapp": {
     "name": "NFT aWallet",
     "version": "1",
     "iconUrl": "https://miniapp-nft-v2.vercel.app/icon.png",
@@ -19,16 +27,7 @@
       "nft",
       "assets",
       "wallet",
-      "advaced"
-    ],
+      "advaced"],
     "noindex": false
-  },
-  "accountAssociation": {
-    "header": "eyJmaWQiOjQ3ODY1MSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweGRCQjlmNzZEQzI4OUI0Y2VjNThCQ2ZlMTA5MjMwODRGOTZGYTZBZWUifQ",
-    "payload": "eyJkb21haW4iOiJtaW5pYXBwLW5mdC12Mi52ZXJjZWwuYXBwIn0",
-    "signature": "lu58Wq6fQpv9Dm7DycaUtfAI2Hdvf11+RCZ+uec61VxrQLGOUHC2SZzQP2Ja4u/3EgBiJqY7fZJWRVTWmUukKhw="
-  }
-  "baseBuilder": {
-    "ownerAddress": "0xB541481b59D97f8789998C688E640855Fe754648"
   }
 }
