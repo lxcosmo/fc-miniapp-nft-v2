@@ -12,7 +12,7 @@ const APP_URL = "https://miniapp-nft-v2.vercel.app";
 
 const miniAppEmbed = {
   version: "1",
-  imageUrl: `${APP_URL}/embed.png`,
+  imageUrl: `${APP_URL}/embed2.png`,
   button: {
     title: "Open Wallet",
     action: {
