@@ -1,60 +1,60 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import { FarcasterProvider } from "./providers"
-import "./globals.css"
+import type React from "react";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { FarcasterProvider } from "./providers";
+import "./globals.css";
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const _geist = Geist({ subsets: ["latin"] });
+const _geistMono = Geist_Mono({ subsets: ["latin"] });
+
+const APP_URL = "https://miniapp-nft-v2.vercel.app";
+
+const miniAppEmbed = {
+  version: "1",
+  imageUrl: `${APP_URL}/embed.png`,
+  button: {
+    title: "Open Wallet",
+    action: {
+      type: "launch_miniapp",
+      name: "NFT aWallet",
+      url: APP_URL,
+      splashImageUrl: `${APP_URL}/icon.png`,
+      splashBackgroundColor: "#ffffff"
+    }
+  }
+};
 
 export const metadata: Metadata = {
   title: "Farcaster NFT Wallet",
   description: "View your ETH balance and NFT collection",
-  generator: "v0.app",
   manifest: "/manifest.json",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/icon.png",
       },
     ],
-    apple: "/apple-icon.png",
   },
   openGraph: {
     title: "Farcaster NFT Wallet",
-    description: "View your ETH balance and NFT collection",
-    images: ["/colorful-abstract-ape-art.jpg"],
+    description: "View your NFTs",
+    images: [`${APP_URL}/embed.png`],
   },
   other: {
-    "fc:frame": "vNext",
-    "fc:frame:image": "https://fc-miniapp-nft-v2.vercel.app/colorful-abstract-ape-art.jpg",
-    "fc:frame:button:1": "Open App",
-    "fc:frame:button:1:action": "link",
-    "fc:frame:button:1:target": "https://fc-miniapp-nft-v2.vercel.app",
+    "fc:miniapp": JSON.stringify(miniAppEmbed),
   },
-}
+};
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
-        <FarcasterProvider>{children}</FarcasterProvider>
+      <body className="font-sans antialiased">
+        <FarcasterProvider>
+          {children}
+        </FarcasterProvider>
         <Analytics />
       </body>
     </html>
-  )
+  );
 }
