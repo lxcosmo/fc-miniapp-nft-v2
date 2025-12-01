@@ -41,17 +41,39 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
       }
 
       try {
-        console.log("[v0] Fetching collection data for contract:", nft.contractAddress)
-        const response = await fetch(`/api/opensea-data?contract=${nft.contractAddress}`)
+        console.log("[v0] Starting API fetch for contract:", nft.contractAddress)
+        const url = `/api/opensea-data?contract=${nft.contractAddress}`
+        console.log("[v0] Fetching URL:", url)
 
+        const response = await fetch(url)
         console.log("[v0] API response status:", response.status)
 
         if (response.ok) {
           const data = await response.json()
-          console.log("[v0] Collection data received:", data)
-          setCollectionFloor(data.collectionFloor)
-          setTopOffer(data.topOffer)
-          setCollectionDescription(data.description)
+          console.log("[v0] Full API response data:", JSON.stringify(data, null, 2))
+
+          if (data.collectionFloor) {
+            const floorValue = Number.parseFloat(data.collectionFloor).toFixed(4)
+            console.log("[v0] Setting floor price:", floorValue)
+            setCollectionFloor(floorValue)
+          } else {
+            console.log("[v0] No floor price in response")
+            setCollectionFloor(null)
+          }
+
+          if (data.topOffer) {
+            const offerValue = Number.parseFloat(data.topOffer).toFixed(4)
+            console.log("[v0] Setting top offer:", offerValue)
+            setTopOffer(offerValue)
+          } else {
+            console.log("[v0] No top offer in response")
+            setTopOffer(null)
+          }
+
+          if (data.description) {
+            console.log("[v0] Setting collection description")
+            setCollectionDescription(data.description)
+          }
         } else {
           const errorText = await response.text()
           console.error("[v0] API error response:", errorText)
@@ -61,6 +83,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
       }
     }
 
+    console.log("[v0] useEffect running - NFT:", nft?.name, "Contract:", nft?.contractAddress)
     fetchOpenSeaData()
   }, [nft])
 
