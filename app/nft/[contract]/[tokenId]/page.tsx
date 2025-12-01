@@ -119,7 +119,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
                 <div className="flex justify-between items-start">
                   <span className="text-sm text-muted-foreground">Collection Floor</span>
                   <span className="text-sm font-medium text-foreground">
-                    {collectionFloor || nft.floorPrice || "—"} {(collectionFloor || nft.floorPrice) && "ETH"}
+                    {collectionFloor ? `${collectionFloor} ETH` : "—"}
                   </span>
                 </div>
 
@@ -139,12 +139,26 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
                   <p className="text-sm text-muted-foreground mb-1">About</p>
                   <p className="text-xs text-foreground">
                     {collectionDescription || nft.description || "No description available"}
+                    {nft.rawMetadata?.creator && (
+                      <>
+                        {" "}
+                        <a
+                          href={`https://basescan.org/address/${nft.rawMetadata.creator}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {nft.rawMetadata.creator.slice(0, 6)}...{nft.rawMetadata.creator.slice(-4)}
+                        </a>
+                      </>
+                    )}
                   </p>
                 </div>
 
                 <div className="border-t border-border pt-3">
                   <p className="text-sm text-muted-foreground mb-1">Rarity</p>
-                  <p className="text-xs text-foreground">Rarity data coming soon</p>
+                  <p className="text-xs text-foreground">None</p>
                 </div>
 
                 <div className="border-t border-border pt-3">
