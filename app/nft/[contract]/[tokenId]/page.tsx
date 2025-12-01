@@ -20,6 +20,9 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
   const nftDataString = searchParams.get("data")
   const nft = nftDataString ? JSON.parse(decodeURIComponent(nftDataString)) : null
 
+  const [priceHistory, setPriceHistory] = useState<any[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(false)
+
   useEffect(() => {
     if (nft) {
       console.log("[v0] NFT full object:", nft)
@@ -33,6 +36,30 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
       })
     }
   }, [nft])
+
+  useEffect(() => {
+    if (nft?.contractAddress) {
+      const fetchPriceHistory = async () => {
+        setLoadingHistory(true)
+        try {
+          const response = await fetch(
+            `https://api.reservoir.tools/collections/floor-ask/v1?collection=${nft.contractAddress}&startTimestamp=${Math.floor(Date.now() / 1000) - 365 * 24 * 60 * 60}`,
+          )
+          const data = await response.json()
+          console.log("[v0] Price history data:", data)
+          if (data?.floorAsk) {
+            setPriceHistory(data.floorAsk)
+          }
+        } catch (error) {
+          console.error("[v0] Error fetching price history:", error)
+        } finally {
+          setLoadingHistory(false)
+        }
+      }
+
+      fetchPriceHistory()
+    }
+  }, [nft?.contractAddress])
 
   const formattedFloor = nft?.floorPrice && nft.floorPrice !== "—" ? nft.floorPrice : null
 
@@ -98,16 +125,35 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
                   </span>
                 </div>
 
-                <div className="flex justify-between items-start border-t border-border pt-3">
-                  <span className="text-sm text-muted-foreground">Top Offer</span>
-                  <span className="text-sm font-medium text-foreground">—</span>
-                </div>
-
                 <div className="border-t border-border pt-3">
                   <p className="text-sm text-muted-foreground mb-2">Price History</p>
-                  <div className="h-32 bg-muted rounded flex items-center justify-center">
-                    <span className="text-xs text-muted-foreground">Chart coming soon</span>
-                  </div>
+                  {loadingHistory ? (
+                    <div className="h-32 bg-muted rounded flex items-center justify-center">
+                      <span className="text-xs text-muted-foreground">Loading...</span>
+                    </div>
+                  ) : priceHistory.length > 0 ? (
+                    <div className="h-32 bg-muted rounded p-2">
+                      <svg viewBox="0 0 300 100" className="w-full h-full">
+                        <polyline
+                          points={priceHistory
+                            .map((point: any, i: number) => {
+                              const x = (i / (priceHistory.length - 1)) * 300
+                              const y = 100 - (point.price?.amount?.native || 0) * 10
+                              return `${x},${y}`
+                            })
+                            .join(" ")}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          className="text-primary"
+                        />
+                      </svg>
+                    </div>
+                  ) : (
+                    <div className="h-32 bg-muted rounded flex items-center justify-center">
+                      <span className="text-xs text-muted-foreground">No price history available</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="border-t border-border pt-3">
