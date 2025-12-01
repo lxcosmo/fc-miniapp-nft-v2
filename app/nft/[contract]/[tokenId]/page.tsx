@@ -2,21 +2,49 @@
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ArrowLeft, ExternalLink } from "lucide-react"
+import { ArrowLeft, ExternalLink, ChevronDown } from "lucide-react"
 import { SendNFTModal } from "@/components/send-nft-modal"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useFarcaster } from "@/app/providers"
 
 export default function NFTDetailPage({ params }: { params: { contract: string; tokenId: string } }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showSendModal, setShowSendModal] = useState(false)
+  const [isCollectionOpen, setIsCollectionOpen] = useState(false)
+  const [collectionFloor, setCollectionFloor] = useState<string | null>(null)
+  const [topOffer, setTopOffer] = useState<string | null>(null)
   const { sdk } = useFarcaster()
 
   const nftDataString = searchParams.get("data")
   const nft = nftDataString ? JSON.parse(decodeURIComponent(nftDataString)) : null
+
+  useEffect(() => {
+    const fetchOpenSeaData = async () => {
+      if (!nft) return
+
+      try {
+        const collectionSlug = nft.collection?.toLowerCase().replace(/\s+/g, "-") || ""
+
+        const response = await fetch(
+          `/api/opensea-data?contract=${nft.contractAddress}&tokenId=${nft.tokenId}&collectionSlug=${collectionSlug}`,
+        )
+
+        if (response.ok) {
+          const data = await response.json()
+          setCollectionFloor(data.collectionFloor)
+          setTopOffer(data.topOffer)
+        }
+      } catch (error) {
+        console.error("[v0] Error fetching OpenSea data:", error)
+      }
+    }
+
+    fetchOpenSeaData()
+  }, [nft])
 
   const handleHide = () => {
     if (!nft) return
@@ -61,17 +89,54 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
 
         <Card className="p-4 mb-4 bg-card border-border">
           <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Collection</span>
-              <span className="text-sm font-medium text-foreground truncate ml-4">{nft.collection}</span>
-            </div>
+            <Collapsible open={isCollectionOpen} onOpenChange={setIsCollectionOpen}>
+              <CollapsibleTrigger className="flex justify-between items-center w-full hover:bg-muted/50 rounded px-2 py-1 -mx-2">
+                <span className="text-sm text-muted-foreground">Collection</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground truncate">{nft.collection}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${isCollectionOpen ? "rotate-180" : ""}`} />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3 mt-3 pt-3 border-t border-border">
+                <div className="flex justify-between items-start">
+                  <span className="text-sm text-muted-foreground">Collection Floor</span>
+                  <span className="text-sm font-medium text-foreground">
+                    {collectionFloor || nft.floorPrice || "—"} {(collectionFloor || nft.floorPrice) && "ETH"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-start border-t border-border pt-3">
+                  <span className="text-sm text-muted-foreground">Top offer</span>
+                  <span className="text-sm font-medium text-foreground">{topOffer ? `${topOffer} ETH` : "—"}</span>
+                </div>
+
+                <div className="border-t border-border pt-3">
+                  <p className="text-sm text-muted-foreground mb-2">Price History</p>
+                  <div className="h-32 bg-muted rounded flex items-center justify-center">
+                    <span className="text-xs text-muted-foreground">Chart coming soon</span>
+                  </div>
+                </div>
+
+                <div className="border-t border-border pt-3">
+                  <p className="text-sm text-muted-foreground mb-1">About</p>
+                  <p className="text-xs text-foreground">Collection information will be displayed here.</p>
+                </div>
+
+                <div className="border-t border-border pt-3">
+                  <p className="text-sm text-muted-foreground mb-1">Rarity</p>
+                  <p className="text-xs text-foreground">Rarity data will be displayed here.</p>
+                </div>
+
+                <div className="border-t border-border pt-3">
+                  <p className="text-sm text-muted-foreground mb-1">Traits</p>
+                  <p className="text-xs text-foreground">NFT traits will be displayed here.</p>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
             <div className="flex justify-between items-start border-t border-border pt-3">
               <span className="text-sm text-muted-foreground">Token ID</span>
               <span className="text-sm font-medium text-foreground">{nft.tokenId}</span>
-            </div>
-            <div className="flex justify-between items-start border-t border-border pt-3">
-              <span className="text-sm text-muted-foreground">Floor price</span>
-              <span className="text-sm font-medium text-foreground">{nft.floorPrice || "—"} ETH</span>
             </div>
             <div className="flex justify-between items-start border-t border-border pt-3">
               <span className="text-sm text-muted-foreground">Chain</span>
