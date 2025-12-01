@@ -12,46 +12,47 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const url = `https://api.reservoir.tools/collections/v5?id=${encodeURIComponent(contract)}`
-    console.log("[v0] Fetching from Reservoir:", url)
+    const reservoirUrl = `https://api-base.reservoir.tools/collections/v7?id=${contract}`
+    console.log("[v0] Fetching collection data from Reservoir:", reservoirUrl)
 
-    const res = await fetch(url, {
+    const response = await fetch(reservoirUrl, {
       headers: {
         Accept: "application/json",
       },
     })
 
-    console.log("[v0] Reservoir response status:", res.status)
+    console.log("[v0] Reservoir response status:", response.status)
 
-    if (!res.ok) {
-      const text = await res.text()
-      console.error("[v0] Reservoir error:", res.status, text)
-      return NextResponse.json({ error: "Reservoir API error", status: res.status }, { status: 500 })
+    if (!response.ok) {
+      const text = await response.text()
+      console.error("[v0] Reservoir error:", response.status, text)
+      return NextResponse.json({ error: "Reservoir API error", status: response.status }, { status: 500 })
     }
 
-    const json = await res.json()
-    console.log("[v0] Reservoir raw response:", JSON.stringify(json, null, 2))
+    const data = await response.json()
+    console.log("[v0] Full Reservoir response:", JSON.stringify(data, null, 2))
 
-    const collection = json.collections?.[0]
+    const collection = data.collections?.[0]
 
     if (!collection) {
-      console.log("[v0] Collection not found in Reservoir")
+      console.log("[v0] No collection found in response")
       return NextResponse.json({ error: "Collection not found" }, { status: 404 })
     }
 
-    const floor = collection.floorAsk?.price?.amount?.native
-    const topBid = collection.topBid?.price?.amount?.native
+    console.log("[v0] Collection object:", JSON.stringify(collection, null, 2))
 
-    console.log("[v0] Extracted data - Floor:", floor, "Top Bid:", topBid)
+    const floor = collection.floorAsk?.price?.amount?.native
+    const topOffer = collection.topBid?.price?.amount?.native
+    const description = collection.description
+    const supply = collection.tokenCount
+
+    console.log("[v0] Extracted data - Floor:", floor, "Top Offer:", topOffer, "Supply:", supply)
 
     return NextResponse.json({
       collectionFloor: floor ?? null,
-      topOffer: topBid ?? null,
-      name: collection.name,
-      description: collection.description,
-      image: collection.image,
-      supply: collection.tokenCount,
-      owners: collection.ownerCount,
+      topOffer: topOffer ?? null,
+      description: description ?? null,
+      supply: supply ?? null,
     })
   } catch (error) {
     console.error("[v0] Error fetching Reservoir data:", error)

@@ -16,7 +16,8 @@ interface NFT {
   contractAddress: string
   floorPrice?: string
   description?: string
-  traits?: Array<{ trait_type: string; value: string }>
+  traits?: Array<{ trait_type: string; value: string; trait_count: number }>
+  supply?: number
   rawMetadata?: any
 }
 
@@ -101,7 +102,13 @@ export function NFTGrid({
               contractAddress: nft.contract.address,
               floorPrice: nft.contract.openSeaMetadata?.floorPrice?.toString() || "—",
               description: nft.raw?.metadata?.description || nft.description,
-              traits: nft.raw?.metadata?.attributes || [],
+              traits:
+                nft.raw?.metadata?.attributes?.map((attr: any) => ({
+                  trait_type: attr.trait_type,
+                  value: attr.value,
+                  trait_count: attr.trait_count,
+                })) || [],
+              supply: nft.contract.totalSupply,
               rawMetadata: nft.raw?.metadata,
             }
           })

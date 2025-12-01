@@ -18,6 +18,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
   const [collectionFloor, setCollectionFloor] = useState<string | null>(null)
   const [topOffer, setTopOffer] = useState<string | null>(null)
   const [collectionDescription, setCollectionDescription] = useState<string | null>(null)
+  const [collectionSupply, setCollectionSupply] = useState<number | null>(null)
   const { sdk } = useFarcaster()
 
   const nftDataString = searchParams.get("data")
@@ -73,6 +74,11 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
           if (data.description) {
             console.log("[v0] Setting collection description")
             setCollectionDescription(data.description)
+          }
+
+          if (data.supply) {
+            console.log("[v0] Setting collection supply:", data.supply)
+            setCollectionSupply(data.supply)
           }
         } else {
           const errorText = await response.text()
@@ -180,24 +186,29 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
                 </div>
 
                 <div className="border-t border-border pt-3">
-                  <p className="text-sm text-muted-foreground mb-1">Rarity</p>
-                  <p className="text-xs text-foreground">None</p>
-                </div>
-
-                <div className="border-t border-border pt-3">
                   <p className="text-sm text-muted-foreground mb-2">Traits</p>
                   {nft.traits && nft.traits.length > 0 ? (
                     <div className="grid grid-cols-2 gap-2">
-                      {nft.traits.map((trait, index) => (
+                      {nft.traits.map((trait: any, index: number) => (
                         <div key={index} className="bg-muted rounded p-2">
                           <p className="text-[10px] text-muted-foreground uppercase mb-0.5">{trait.trait_type}</p>
                           <p className="text-xs font-medium text-foreground truncate">{trait.value}</p>
+                          {trait.trait_count && collectionSupply && (
+                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                              {((trait.trait_count / collectionSupply) * 100).toFixed(1)}%
+                            </p>
+                          )}
                         </div>
                       ))}
                     </div>
                   ) : (
                     <p className="text-xs text-foreground">No traits available</p>
                   )}
+                </div>
+
+                <div className="border-t border-border pt-3">
+                  <p className="text-sm text-muted-foreground mb-1">Rarity</p>
+                  <p className="text-xs text-foreground">None</p>
                 </div>
               </CollapsibleContent>
             </Collapsible>
