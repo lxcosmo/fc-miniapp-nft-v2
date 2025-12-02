@@ -61,17 +61,16 @@ export default function Page() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 100 && !isHeaderCollapsed && !manuallyExpanded) {
+      if (window.scrollY > 100) {
         setIsHeaderCollapsed(true)
-      } else if (window.scrollY <= 100) {
+      } else {
         setIsHeaderCollapsed(false)
-        setManuallyExpanded(false)
       }
     }
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [isHeaderCollapsed, manuallyExpanded])
+  }, [])
 
   const cycleGridMode = () => {
     if (gridMode === 2) setGridMode(3)
@@ -115,8 +114,7 @@ export default function Page() {
 
   const handleExpandHeader = () => {
     console.log("[v0] Expand button clicked")
-    setIsHeaderCollapsed(false)
-    setManuallyExpanded(true)
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   return (
