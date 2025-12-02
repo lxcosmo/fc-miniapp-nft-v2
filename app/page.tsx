@@ -17,6 +17,7 @@ export default function Page() {
   const [sortBy, setSortBy] = useState<"date" | "name" | "collection" | "floor">("date")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(false)
+  const [manuallyExpanded, setManuallyExpanded] = useState(false)
   const [nftCount, setNftCount] = useState<number>(0)
   const [nftTotalValue, setNftTotalValue] = useState<number>(0)
   const router = useRouter()
@@ -60,14 +61,17 @@ export default function Page() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 100 && !isHeaderCollapsed) {
+      if (window.scrollY > 100 && !isHeaderCollapsed && !manuallyExpanded) {
         setIsHeaderCollapsed(true)
+      } else if (window.scrollY <= 100) {
+        setIsHeaderCollapsed(false)
+        setManuallyExpanded(false)
       }
     }
 
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [isHeaderCollapsed])
+  }, [isHeaderCollapsed, manuallyExpanded])
 
   const cycleGridMode = () => {
     if (gridMode === 2) setGridMode(3)
@@ -109,6 +113,12 @@ export default function Page() {
     }
   }
 
+  const handleExpandHeader = () => {
+    console.log("[v0] Expand button clicked")
+    setIsHeaderCollapsed(false)
+    setManuallyExpanded(true)
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="max-w-6xl mx-auto px-4 py-4">
@@ -117,12 +127,7 @@ export default function Page() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 {isHeaderCollapsed && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsHeaderCollapsed(false)}
-                    className="bg-transparent px-2"
-                  >
+                  <Button variant="outline" size="sm" onClick={handleExpandHeader} className="bg-transparent px-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>

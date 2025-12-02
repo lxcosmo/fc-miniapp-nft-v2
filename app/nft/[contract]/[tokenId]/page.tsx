@@ -9,6 +9,7 @@ import { ArrowLeft, ExternalLink, ChevronDown } from "lucide-react"
 import { SendNFTModal } from "@/components/send-nft-modal"
 import { useState, useEffect } from "react"
 import { useFarcaster } from "@/app/providers"
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 
 export default function NFTDetailPage({ params }: { params: { contract: string; tokenId: string } }) {
   const router = useRouter()
@@ -38,21 +39,24 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
   }, [nft])
 
   useEffect(() => {
-    if (nft?.contractAddress) {
+    if (nft?.contractAddress && nft?.tokenId) {
       const fetchPriceHistory = async () => {
         setLoadingHistory(true)
+        console.log("[v0] Fetching price history for:", nft.contractAddress, nft.tokenId)
         try {
-          const endTime = Math.floor(Date.now() / 1000)
-          const startTime = endTime - 365 * 24 * 60 * 60 // 1 year ago
-
-          const response = await fetch(
-            `https://api.reservoir.tools/events/collections/floor-ask/v2?collection=${nft.contractAddress}&startTimestamp=${startTime}&endTimestamp=${endTime}`,
-          )
+          // Use Alchemy API to get NFT sales
+          const response = await fetch(`/api/nfts?address=${nft.contractAddress}&tokenId=${nft.tokenId}&history=true`)
           const data = await response.json()
-          console.log("[v0] Price history response:", data)
+          console.log("[v0] Sales history response:", data)
 
-          if (data?.events && Array.isArray(data.events) && data.events.length > 0) {
-            setPriceHistory(data.events)
+          if (data?.sales && Array.isArray(data.sales) && data.sales.length > 0) {
+            // Transform sales data for chart
+            const chartData = data.sales.map((sale: any) => ({
+              date: new Date(sale.timestamp).toLocaleDateString(),
+              price: Number.parseFloat(sale.price) || 0,
+            }))
+            setPriceHistory(chartData)
+            console.log("[v0] Chart data:", chartData)
           }
         } catch (error) {
           console.error("[v0] Error fetching price history:", error)
@@ -63,7 +67,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
 
       fetchPriceHistory()
     }
-  }, [nft?.contractAddress])
+  }, [nft?.contractAddress, nft?.tokenId])
 
   const formattedFloor = nft?.floorPrice && nft.floorPrice !== "—" ? nft.floorPrice : null
 
@@ -137,26 +141,30 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
                     </div>
                   ) : priceHistory.length > 0 ? (
                     <div className="h-32 bg-muted rounded p-2">
-                      <svg viewBox="0 0 300 100" className="w-full h-full">
-                        <polyline
-                          points={priceHistory
-                            .map((event: any, i: number) => {
-                              const x = (i / (priceHistory.length - 1)) * 300
-                              const price = event.floorAsk?.price?.amount?.native || 0
-                              const y = 100 - Math.min(price * 100, 90)
-                              return `${x},${y}`
-                            })
-                            .join(" ")}
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          className="text-primary"
-                        />
-                      </svg>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={priceHistory}>
+                          <XAxis dataKey="date" hide />
+                          <YAxis hide />
+                          <Tooltip
+                            contentStyle={{
+                              background: "hsl(var(--background))",
+                              border: "1px solid hsl(var(--border))",
+                            }}
+                            formatter={(value: number) => [`${value.toFixed(4)} ETH`, "Price"]}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="price"
+                            stroke="hsl(var(--primary))"
+                            strokeWidth={2}
+                            dot={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </div>
                   ) : (
                     <div className="h-32 bg-muted rounded flex items-center justify-center">
-                      <span className="text-xs text-muted-foreground">No price history available</span>
+                      <span className="text-xs text-muted-foreground">No sales history available</span>
                     </div>
                   )}
                 </div>
