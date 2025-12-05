@@ -7,6 +7,7 @@ import { useFarcaster } from "@/app/providers"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { ArrowUpNarrowWide, ArrowDownWideNarrow } from "lucide-react"
 
 export default function Page() {
   const { isSDKLoaded, walletAddress, ethBalance } = useFarcaster()
@@ -119,9 +120,6 @@ export default function Page() {
                     />
                   </svg>
                 </Button>
-                {!isHeaderCollapsed && (
-                  <h1 className="text-[1.35rem] font-bold text-foreground whitespace-nowrap">NFT aWallet</h1>
-                )}
               </div>
               <Button variant="outline" size="sm" onClick={() => router.push("/hidden")} className="bg-transparent">
                 Hidden NFTs
@@ -142,7 +140,7 @@ export default function Page() {
                       onClick={handleCopy}
                       className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground font-mono"
                     >
-                      {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                      {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                           strokeLinecap="round"
@@ -189,13 +187,9 @@ export default function Page() {
                     className="flex items-center gap-1 bg-transparent px-2"
                   >
                     {sortDirection === "asc" ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                      </svg>
+                      <ArrowUpNarrowWide className="w-4 h-4" />
                     ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <ArrowDownWideNarrow className="w-4 h-4" />
                     )}
                   </Button>
                   <Button
