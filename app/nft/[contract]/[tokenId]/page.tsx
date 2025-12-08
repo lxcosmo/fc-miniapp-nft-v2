@@ -40,24 +40,36 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
 
   useEffect(() => {
     if (!nft?.contractAddress) {
+      console.log("[v0] No contract address, skipping price history fetch")
       return
     }
 
     const fetchPriceHistory = async () => {
       setLoadingHistory(true)
+      console.log("[v0] Starting price history fetch for contract:", nft.contractAddress)
 
       try {
-        const response = await fetch(`/api/nfts?contractAddress=${nft.contractAddress}&history=true`)
+        const url = `/api/price-history?contractAddress=${nft.contractAddress}`
+        console.log("[v0] Fetching from URL:", url)
+
+        const response = await fetch(url)
+        console.log("[v0] Response status:", response.status)
 
         const data = await response.json()
+        console.log("[v0] Response data:", data)
 
-        if (data?.sales && Array.isArray(data.sales) && data.sales.length > 0) {
-          setPriceHistory(data.sales)
+        if (data?.events && Array.isArray(data.events) && data.events.length > 0) {
+          console.log("[v0] Setting price history with", data.events.length, "data points")
+          console.log("[v0] First few data points:", data.events.slice(0, 3))
+          setPriceHistory(data.events)
+        } else {
+          console.log("[v0] No price history events returned or empty array")
         }
       } catch (error) {
         console.error("[v0] Error fetching price history:", error)
       } finally {
         setLoadingHistory(false)
+        console.log("[v0] Price history fetch completed")
       }
     }
 

@@ -5,7 +5,6 @@ import Image from "next/image"
 import { useFarcaster } from "@/app/providers"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Check } from "lucide-react"
 
 interface NFT {
   id: string
@@ -276,11 +275,6 @@ export function NFTGrid({
                 clearTimeout((e.currentTarget as any).longPressTimeout)
               }}
             >
-              {isSelected && (
-                <div className="absolute top-2 right-2 z-10 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                  <Check className="w-4 h-4 text-primary-foreground" />
-                </div>
-              )}
               <div className="flex items-center h-16">
                 <div className="w-16 h-16 relative bg-muted flex-shrink-0">
                   <Image src={nft.image || "/placeholder.svg"} alt={nft.name} fill className="object-cover" />
@@ -336,11 +330,6 @@ export function NFTGrid({
               clearTimeout((e.currentTarget as any).longPressTimeout)
             }}
           >
-            {isSelected && (
-              <div className="absolute top-2 right-2 z-10 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                <Check className="w-4 h-4 text-primary-foreground" />
-              </div>
-            )}
             <div className={`relative bg-muted ${gridMode === 2 ? "h-40 w-full" : "aspect-square w-full"}`}>
               <Image src={nft.image || "/placeholder.svg"} alt={nft.name} fill className="object-cover" />
               {gridMode === 2 && (

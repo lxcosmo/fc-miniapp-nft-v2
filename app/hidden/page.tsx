@@ -168,8 +168,18 @@ export default function HiddenPage() {
       </div>
 
       {isSelectionMode && selectedNFTs.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4">
-          <div className="max-w-6xl mx-auto grid grid-cols-2 gap-3">
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 z-50">
+          <div className="max-w-6xl mx-auto grid grid-cols-3 gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedNFTs([])
+                setIsSelectionMode(false)
+              }}
+              className="bg-background text-foreground"
+            >
+              Cancel
+            </Button>
             <Button variant="outline" onClick={handleUnhideSelected} className="bg-background text-foreground">
               Unhide ({selectedNFTs.length})
             </Button>

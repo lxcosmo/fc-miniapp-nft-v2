@@ -106,7 +106,7 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="max-w-6xl mx-auto px-4 py-4">
-        <div className="sticky top-0 bg-background z-10 pb-2">
+        <div className="sticky top-0 bg-background z-50 pb-2 -mx-4 px-4 shadow-sm">
           <header className={`${isHeaderCollapsed ? "mb-2" : "mb-5.5"}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -245,8 +245,18 @@ export default function Page() {
       </div>
 
       {isSelectionMode && selectedNFTs.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4">
-          <div className="max-w-6xl mx-auto grid grid-cols-2 gap-3">
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 z-50">
+          <div className="max-w-6xl mx-auto grid grid-cols-3 gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedNFTs([])
+                setIsSelectionMode(false)
+              }}
+              className="bg-background text-foreground"
+            >
+              Cancel
+            </Button>
             <Button variant="outline" onClick={handleHideSelected} className="bg-background text-foreground">
               Hide ({selectedNFTs.length})
             </Button>
