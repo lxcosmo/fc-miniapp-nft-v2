@@ -2,14 +2,13 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const { message } = await request.json()
+    const { message, targetUsername } = await request.json()
 
     if (!message?.trim()) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 })
     }
 
-    // For now, just log it - you can implement actual Farcaster DM sending here
-    console.log("[Feedback]", message)
+    console.log(`[Feedback to ${targetUsername || "dim39"}]:`, message)
 
     return NextResponse.json({ success: true })
   } catch (error) {

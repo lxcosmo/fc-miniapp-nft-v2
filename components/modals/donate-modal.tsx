@@ -14,23 +14,38 @@ interface DonateModalProps {
 export function DonateModal({ open, onOpenChange }: DonateModalProps) {
   const [amount, setAmount] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const { walletAddress } = useFarcaster()
+  const { walletAddress, sdk } = useFarcaster()
 
   const RECIPIENT_ADDRESS = "0x11414661E194b8b0D7248E789c1d41332904f2bA"
 
   const handleSend = async () => {
-    if (!amount || !walletAddress) return
+    if (!amount || !walletAddress || !sdk) {
+      console.log("[v0] Missing fields for donation")
+      return
+    }
 
     setIsLoading(true)
     try {
-      // TODO: Implement actual donation transaction using ethers.js
-      console.log(`Sending ${amount} ETH from ${walletAddress} to ${RECIPIENT_ADDRESS}`)
+      const amountInWei = String(BigInt(Math.floor(Number(amount) * 1e18)))
+      console.log(`[v0] Attempting to send ${amount} ETH to ${RECIPIENT_ADDRESS}`)
 
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      const txHash = await sdk.wallet.ethProvider.request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from: walletAddress,
+            to: RECIPIENT_ADDRESS,
+            value: amountInWei,
+            gas: "21000",
+          },
+        ],
+      })
+
+      console.log("[v0] Transaction sent:", txHash)
       setAmount("")
       onOpenChange(false)
     } catch (error) {
-      console.error("Error sending donation:", error)
+      console.error("[v0] Error sending donation:", error)
     } finally {
       setIsLoading(false)
     }

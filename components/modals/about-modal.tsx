@@ -1,7 +1,6 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 
 interface AboutModalProps {
   open: boolean
@@ -17,7 +16,7 @@ export function AboutModal({ open, onOpenChange, onDonateClick, onWhatsNewClick 
         <DialogHeader>
           <DialogTitle>About</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="flex flex-col items-center justify-center space-y-4 py-4">
           <div className="text-sm text-foreground">
             Created by{" "}
             <a
@@ -30,12 +29,12 @@ export function AboutModal({ open, onOpenChange, onDonateClick, onWhatsNewClick 
             </a>
           </div>
           <div className="text-sm text-muted-foreground">Version v1.6</div>
-          <Button variant="outline" size="sm" onClick={onWhatsNewClick} className="w-1/2 text-primary bg-transparent">
+          <button onClick={onWhatsNewClick} className="text-primary hover:underline text-sm cursor-pointer">
             What's New
-          </Button>
-          <Button variant="outline" size="sm" onClick={onDonateClick} className="w-1/2 text-primary bg-transparent">
+          </button>
+          <button onClick={onDonateClick} className="text-primary hover:underline text-sm cursor-pointer">
             Donate
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>

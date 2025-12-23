@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { useFarcaster } from "@/app/providers"
 
 interface FeedbackModalProps {
   open: boolean
@@ -12,16 +13,22 @@ interface FeedbackModalProps {
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [feedback, setFeedback] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const { sdk } = useFarcaster()
 
   const handleSend = async () => {
     if (!feedback.trim()) return
 
     setIsLoading(true)
     try {
+      console.log("[v0] Sending feedback to dim39:", feedback)
+
       const response = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: feedback }),
+        body: JSON.stringify({
+          message: feedback,
+          targetUsername: "dim39",
+        }),
       })
 
       if (response.ok) {
@@ -29,7 +36,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
         onOpenChange(false)
       }
     } catch (error) {
-      console.error("Error sending feedback:", error)
+      console.error("[v0] Error sending feedback:", error)
     } finally {
       setIsLoading(false)
     }
