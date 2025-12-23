@@ -19,7 +19,7 @@ export function MenuDropdown() {
     if (!sdk) return
     try {
       await sdk.actions.composeCast({
-        text: "Just tried a new Farcaster app called NFT aWallet 🎨\nhttps://nft-awallet.vercel.app",
+        text: "Just tried a new Farcaster app called NFT aWallet 🎨\nminiapp-nft-v2.vercel.app",
       })
     } catch (error) {
       console.error("Error opening composer:", error)
@@ -46,6 +46,12 @@ export function MenuDropdown() {
             className="py-2.5 cursor-pointer hover:bg-transparent focus:bg-transparent"
           >
             Cast Feedback
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => setDonateOpen(true)}
+            className="py-2.5 cursor-pointer hover:bg-transparent focus:bg-transparent"
+          >
+            Donate
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
