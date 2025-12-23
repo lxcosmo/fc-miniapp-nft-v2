@@ -35,9 +35,6 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
       return
     }
 
-    const confirmSend = window.confirm(`Send ${amount} ETH (≈ $${usdValue}) to ${RECIPIENT_ADDRESS}?`)
-    if (!confirmSend) return
-
     setIsLoading(true)
     try {
       const amountInWei = BigInt(Math.floor(Number(amount) * 1e18))
@@ -60,7 +57,6 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
       })
 
       console.log("[v0] Transaction sent:", txHash)
-      alert("Donation sent successfully!")
       setAmount("")
       onOpenChange(false)
     } catch (error) {
@@ -103,7 +99,7 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
             disabled={!amount || isLoading || !walletAddress}
             className="w-full bg-primary hover:bg-primary/90"
           >
-            {isLoading ? "Sending..." : "Send"}
+            {isLoading ? "Thanks 🙏🏻" : "Send"}
           </Button>
         </div>
       </DialogContent>

@@ -3,7 +3,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { useFarcaster } from "@/app/providers"
 
 interface FeedbackModalProps {
   open: boolean
@@ -13,37 +12,27 @@ interface FeedbackModalProps {
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [feedback, setFeedback] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const { sdk, isSDKLoaded } = useFarcaster()
 
   const handleSend = async () => {
     if (!feedback.trim()) return
 
     setIsLoading(true)
     try {
-      console.log("[v0] SDK ready?", isSDKLoaded)
-      console.log("[v0] SDK instance?", !!sdk)
-      console.log("[v0] SDK actions?", !!sdk?.actions)
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: feedback }),
+      })
 
-      if (sdk?.actions?.composeCast) {
-        const result = await sdk.actions.composeCast({
-          text: `Feedback for @partakon: ${feedback}`,
-        })
-        console.log("[v0] Composer opened:", result)
-        alert("Feedback composer opened! Please review and send in Farcaster.")
-        setFeedback("")
-        onOpenChange(false)
-      } else if (sdk?.actions?.openUrl) {
-        const text = encodeURIComponent(`Feedback for @partakon: ${feedback}`)
-        await sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${text}`)
-        setFeedback("")
-        onOpenChange(false)
-      } else {
-        console.error("[v0] SDK actions not available")
-        alert("Unable to open composer. Please ensure this is running in Farcaster context.")
+      if (!response.ok) {
+        throw new Error("Failed to send feedback")
       }
+
+      setFeedback("")
+      onOpenChange(false)
     } catch (error) {
-      console.error("[v0] Error opening feedback composer:", error)
-      alert(`Error: ${error instanceof Error ? error.message : "Unknown error"}`)
+      console.error("[v0] Error sending feedback:", error)
+      alert(`Error: ${error instanceof Error ? error.message : "Failed to send feedback"}`)
     } finally {
       setIsLoading(false)
     }
@@ -67,7 +56,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
             disabled={!feedback.trim() || isLoading}
             className="w-full bg-primary hover:bg-primary/90"
           >
-            {isLoading ? "Sending..." : "Send"}
+            {isLoading ? "Done 🙏🏻" : "Send"}
           </Button>
         </div>
       </DialogContent>

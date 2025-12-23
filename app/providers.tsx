@@ -13,7 +13,7 @@ interface FarcasterContextType {
   sdk: typeof farcasterSdk | null
 }
 
-const FarcasterContext = createContext<FarcasterContextType>({
+export const FarcasterContext = createContext<FarcasterContextType>({
   isSDKLoaded: false,
   context: null,
   walletAddress: null,
@@ -63,16 +63,19 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
           console.log("[v0] Frame context loaded successfully")
           console.log("[v0] frameContext exists?", !!frameContext)
           console.log("[v0] frameContext.user exists?", !!frameContext?.user)
-          
+
           if (frameContext?.user) {
             console.log("[v0] === USER DATA START ===")
             console.log("[v0] custody_address:", frameContext.user.custody_address)
             console.log("[v0] verified_addresses object:", frameContext.user.verified_addresses)
-            
+
             if (frameContext.user.verified_addresses) {
               console.log("[v0] eth_addresses array:", frameContext.user.verified_addresses.eth_addresses)
-              console.log("[v0] Number of eth addresses:", frameContext.user.verified_addresses.eth_addresses?.length || 0)
-              
+              console.log(
+                "[v0] Number of eth addresses:",
+                frameContext.user.verified_addresses.eth_addresses?.length || 0,
+              )
+
               // Log each address individually
               frameContext.user.verified_addresses.eth_addresses?.forEach((addr, index) => {
                 console.log(`[v0] eth_address[${index}]:`, addr)
@@ -80,7 +83,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
             }
             console.log("[v0] === USER DATA END ===")
           }
-          
+
           setContext(frameContext)
 
           const address =
@@ -183,14 +186,14 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
 
   return (
     <FarcasterContext.Provider
-      value={{ 
-        isSDKLoaded, 
-        context, 
-        walletAddress, 
-        ethBalance, 
-        connectWallet, 
-        isWalletConnected, 
-        sdk: sdkInstance || farcasterSdk 
+      value={{
+        isSDKLoaded,
+        context,
+        walletAddress,
+        ethBalance,
+        connectWallet,
+        isWalletConnected,
+        sdk: sdkInstance || farcasterSdk,
       }}
     >
       {children}
