@@ -20,9 +20,13 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
 
   const handleSend = async () => {
     if (!amount || !walletAddress || !sdk) {
-      console.log("[v0] Missing fields for donation")
+      console.log("[v0] Missing fields - walletAddress:", walletAddress, "sdk:", !!sdk)
+      alert("Please connect your wallet first")
       return
     }
+
+    const confirmSend = window.confirm(`Send ${amount} ETH from ${walletAddress} to ${RECIPIENT_ADDRESS}?`)
+    if (!confirmSend) return
 
     setIsLoading(true)
     try {
@@ -42,10 +46,12 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
       })
 
       console.log("[v0] Transaction sent:", txHash)
+      alert("Donation sent successfully!")
       setAmount("")
       onOpenChange(false)
     } catch (error) {
       console.error("[v0] Error sending donation:", error)
+      alert(`Error sending donation: ${error instanceof Error ? error.message : "Unknown error"}`)
     } finally {
       setIsLoading(false)
     }
@@ -70,9 +76,14 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
               className="bg-background text-foreground"
             />
           </div>
+          {walletAddress && (
+            <div className="text-xs text-muted-foreground text-center">
+              Connected: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+            </div>
+          )}
           <Button
             onClick={handleSend}
-            disabled={!amount || isLoading}
+            disabled={!amount || isLoading || !walletAddress}
             className="w-full bg-primary hover:bg-primary/90"
           >
             {isLoading ? "Sending..." : "Send"}

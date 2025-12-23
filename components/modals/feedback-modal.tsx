@@ -22,21 +22,23 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
     try {
       console.log("[v0] Sending feedback to @partakon:", feedback)
 
-      const response = await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: feedback,
-          targetUsername: "@partakon",
-        }),
-      })
-
-      if (response.ok) {
-        setFeedback("")
-        onOpenChange(false)
+      if (sdk?.user?.fid) {
+        const result = await sdk.actions.cast({
+          text: `@partakon ${feedback}`,
+        })
+        console.log("[v0] Cast sent:", result)
+      } else {
+        console.error("[v0] SDK user not ready:", sdk?.user?.fid)
+        alert("Unable to send feedback. Please ensure Farcaster is connected.")
+        return
       }
+
+      alert("Feedback sent successfully!")
+      setFeedback("")
+      onOpenChange(false)
     } catch (error) {
       console.error("[v0] Error sending feedback:", error)
+      alert(`Error sending feedback: ${error instanceof Error ? error.message : "Unknown error"}`)
     } finally {
       setIsLoading(false)
     }
