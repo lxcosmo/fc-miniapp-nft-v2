@@ -34,7 +34,7 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
     }
   }, [open])
 
-  const RECIPIENT_ADDRESS = "0x11414661E194b8b0D7248E789c1d41332904f2bA"
+  const RECIPIENT_ADDRESS = "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee"
 
   const handleSend = async () => {
     if (!amount || !walletAddress || !sdk) {
