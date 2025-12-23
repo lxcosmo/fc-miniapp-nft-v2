@@ -19,7 +19,8 @@ export function MenuDropdown() {
     if (!sdk) return
     try {
       await sdk.actions.composeCast({
-        text: "Just tried a new Farcaster app called NFT aWallet 🎨\nminiapp-nft-v2.vercel.app",
+        text: "Just tried this app — my first impressions:\n\n✅ ...\n❗ ...",
+        embeds: ["https://miniapp-nft-v2.vercel.app/"],
       })
     } catch (error) {
       console.error("Error opening composer:", error)
@@ -35,22 +36,13 @@ export function MenuDropdown() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 py-2">
-          <DropdownMenuItem
-            onClick={() => setAboutOpen(true)}
-            className="py-2.5 cursor-pointer hover:bg-transparent focus:bg-transparent"
-          >
+          <DropdownMenuItem onClick={() => setAboutOpen(true)} className="py-2.5 cursor-pointer text-foreground">
             About
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={handleCastFeedback}
-            className="py-2.5 cursor-pointer hover:bg-transparent focus:bg-transparent"
-          >
+          <DropdownMenuItem onClick={handleCastFeedback} className="py-2.5 cursor-pointer text-foreground">
             Cast Feedback
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setDonateOpen(true)}
-            className="py-2.5 cursor-pointer hover:bg-transparent focus:bg-transparent"
-          >
+          <DropdownMenuItem onClick={() => setDonateOpen(true)} className="py-2.5 cursor-pointer text-foreground">
             Donate
           </DropdownMenuItem>
         </DropdownMenuContent>
