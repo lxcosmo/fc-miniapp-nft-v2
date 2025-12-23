@@ -3,7 +3,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { useFarcaster } from "@/app/providers"
 
 interface FeedbackModalProps {
   open: boolean
@@ -13,21 +12,22 @@ interface FeedbackModalProps {
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [feedback, setFeedback] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const { farcasterUser } = useFarcaster()
 
   const handleSend = async () => {
-    if (!feedback.trim() || !farcasterUser) return
+    if (!feedback.trim()) return
 
     setIsLoading(true)
     try {
-      // Send feedback via Farcaster DM
-      // This would require Farcaster Frame SDK integration for sending DMs
-      console.log("Sending feedback:", feedback, "from:", farcasterUser.username)
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: feedback }),
+      })
 
-      // For now, just close the modal after a brief delay
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      setFeedback("")
-      onOpenChange(false)
+      if (response.ok) {
+        setFeedback("")
+        onOpenChange(false)
+      }
     } catch (error) {
       console.error("Error sending feedback:", error)
     } finally {

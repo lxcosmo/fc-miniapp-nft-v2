@@ -30,10 +30,10 @@ export function AboutModal({ open, onOpenChange, onDonateClick, onWhatsNewClick 
             </a>
           </div>
           <div className="text-sm text-muted-foreground">Version v1.6</div>
-          <Button variant="outline" size="sm" onClick={onWhatsNewClick} className="w-full text-primary bg-transparent">
+          <Button variant="outline" size="sm" onClick={onWhatsNewClick} className="w-1/2 text-primary bg-transparent">
             What's New
           </Button>
-          <Button onClick={onDonateClick} className="w-full bg-primary hover:bg-primary/90">
+          <Button variant="outline" size="sm" onClick={onDonateClick} className="w-1/2 text-primary bg-transparent">
             Donate
           </Button>
         </div>

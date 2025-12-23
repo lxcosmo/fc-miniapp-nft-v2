@@ -26,8 +26,6 @@ export function MenuDropdown() {
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={() => setAboutOpen(true)}>About</DropdownMenuItem>
           <DropdownMenuItem onClick={() => setFeedbackOpen(true)}>Feedback</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setWhatsNewOpen(true)}>What's New</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDonateOpen(true)}>Donate</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

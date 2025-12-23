@@ -16,7 +16,7 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { walletAddress } = useFarcaster()
 
-  const RECIPIENT_ADDRESS = "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee"
+  const RECIPIENT_ADDRESS = "0x11414661E194b8b0D7248E789c1d41332904f2bA"
 
   const handleSend = async () => {
     if (!amount || !walletAddress) return
