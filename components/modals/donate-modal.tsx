@@ -15,6 +15,7 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
   const [amount, setAmount] = useState("")
   const [usdValue, setUsdValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const { walletAddress, sdk } = useFarcaster()
 
   useEffect(() => {
@@ -26,20 +27,26 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
     }
   }, [amount])
 
+  useEffect(() => {
+    if (open) {
+      setIsSuccess(false)
+      setAmount("")
+    }
+  }, [open])
+
   const RECIPIENT_ADDRESS = "0x11414661E194b8b0D7248E789c1d41332904f2bA"
 
   const handleSend = async () => {
     if (!amount || !walletAddress || !sdk) {
-      console.log("[v0] Missing fields - walletAddress:", walletAddress, "sdk:", !!sdk)
-      alert("Please connect your wallet first")
       return
     }
 
     setIsLoading(true)
+    setIsSuccess(false)
     try {
       const amountInWei = BigInt(Math.floor(Number(amount) * 1e18))
       const hexValue = "0x" + amountInWei.toString(16)
-      const hexGas = "0x5208" // 21000 in hex
+      const hexGas = "0x5208"
 
       console.log(`[v0] Attempting to send ${amount} ETH from ${walletAddress}`)
       console.log("[v0] Amount in wei (hex):", hexValue)
@@ -57,13 +64,17 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
       })
 
       console.log("[v0] Transaction sent:", txHash)
+      setIsSuccess(true)
       setAmount("")
-      onOpenChange(false)
+
+      // Auto-close after 2 seconds
+      setTimeout(() => {
+        onOpenChange(false)
+        setIsSuccess(false)
+      }, 2000)
     } catch (error) {
-      console.error("[v0] Error sending donation:", error)
-      alert(`Error: ${error instanceof Error ? error.message : "Unknown error"}`)
-    } finally {
       setIsLoading(false)
+      onOpenChange(false)
     }
   }
 
@@ -99,7 +110,7 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
             disabled={!amount || isLoading || !walletAddress}
             className="w-full bg-primary hover:bg-primary/90"
           >
-            {isLoading ? "Thanks 🙏🏻" : "Send"}
+            {isSuccess ? "Thanks 🙏🏻" : isLoading ? "Sending..." : "Send"}
           </Button>
         </div>
       </DialogContent>

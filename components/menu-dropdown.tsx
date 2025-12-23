@@ -2,32 +2,27 @@
 
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState, useContext } from "react"
+import { useState } from "react"
 import { AboutModal } from "./modals/about-modal"
 import { WhatsNewModal } from "./modals/whats-new-modal"
 import { DonateModal } from "./modals/donate-modal"
 import { Menu } from "lucide-react"
-import { FarcasterContext } from "@/app/providers"
+import { useFarcaster } from "@/app/providers"
 
 export function MenuDropdown() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false)
   const [donateOpen, setDonateOpen] = useState(false)
-  const { sdk } = useContext(FarcasterContext)
+  const { sdk } = useFarcaster()
 
   const handleCastFeedback = async () => {
     if (!sdk) return
-
-    const appUrl = "https://fk-nft.vercel.app"
-    const text = `${appUrl}\n\nFeedback from NFT Wallet app`
-
     try {
       await sdk.actions.composeCast({
-        text,
-        mentions: [],
+        text: "Just tried a new Farcaster app called NFT aWallet 🎨\nhttps://nft-awallet.vercel.app",
       })
     } catch (error) {
-      console.error("[v0] Error opening cast composer:", error)
+      console.error("Error opening composer:", error)
     }
   }
 
@@ -39,11 +34,17 @@ export function MenuDropdown() {
             <Menu className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 py-3">
-          <DropdownMenuItem onClick={() => setAboutOpen(true)} className="py-3">
+        <DropdownMenuContent align="end" className="w-48 py-2">
+          <DropdownMenuItem
+            onClick={() => setAboutOpen(true)}
+            className="py-2.5 cursor-pointer hover:bg-transparent focus:bg-transparent"
+          >
             About
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleCastFeedback} className="py-3">
+          <DropdownMenuItem
+            onClick={handleCastFeedback}
+            className="py-2.5 cursor-pointer hover:bg-transparent focus:bg-transparent"
+          >
             Cast Feedback
           </DropdownMenuItem>
         </DropdownMenuContent>
