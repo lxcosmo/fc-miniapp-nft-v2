@@ -16,7 +16,7 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
   const [usdValue, setUsdValue] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const { walletAddress, sdk } = useFarcaster()
+  const { walletAddress, sdk, isInFarcaster } = useFarcaster()
 
   useEffect(() => {
     if (amount) {
@@ -31,43 +31,54 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
     if (open) {
       setIsSuccess(false)
       setAmount("")
+      if (!isInFarcaster) {
+        alert("Please donate from mobile app")
+        onOpenChange(false)
+      }
     }
-  }, [open])
+  }, [open, isInFarcaster, onOpenChange])
 
   const RECIPIENT_ADDRESS = "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee"
-  const BASE_ETH_CAIP19 = "eip155:8453/slip44:60"
 
   const handleSend = async () => {
-    if (!amount || !sdk?.actions?.sendToken) {
+    if (!amount || !walletAddress || !sdk) {
       return
     }
 
     setIsLoading(true)
     setIsSuccess(false)
-
     try {
-      const wei = BigInt(Math.floor(Number(amount) * 1e18)).toString()
+      const amountInWei = BigInt(Math.floor(Number(amount) * 1e18))
+      const hexValue = "0x" + amountInWei.toString(16)
+      const hexGas = "0x5208"
 
-      const res = await sdk.actions.sendToken({
-        token: BASE_ETH_CAIP19,
-        recipientAddress: RECIPIENT_ADDRESS,
-        amount: wei,
+      console.log(`[v0] Attempting to send ${amount} ETH from ${walletAddress}`)
+      console.log("[v0] Amount in wei (hex):", hexValue)
+
+      const txHash = await sdk.wallet.ethProvider.request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from: walletAddress,
+            to: RECIPIENT_ADDRESS,
+            value: hexValue,
+            gas: hexGas,
+          },
+        ],
       })
 
-      if (res?.success) {
-        setIsSuccess(true)
-        setAmount("")
-        setTimeout(() => {
-          onOpenChange(false)
-          setIsSuccess(false)
-        }, 1200)
-      } else {
-        console.log("[donate] sendToken not successful:", res)
-      }
+      console.log("[v0] Transaction sent:", txHash)
+      setIsSuccess(true)
+      setAmount("")
+
+      // Auto-close after 2 seconds
+      setTimeout(() => {
+        onOpenChange(false)
+        setIsSuccess(false)
+      }, 2000)
     } catch (error) {
-      console.log("[donate] sendToken error:", error)
-    } finally {
       setIsLoading(false)
+      onOpenChange(false)
     }
   }
 
@@ -100,7 +111,7 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
           )}
           <Button
             onClick={handleSend}
-            disabled={!amount || isLoading}
+            disabled={!amount || isLoading || !walletAddress}
             className="w-full bg-primary hover:bg-primary/90"
           >
             {isSuccess ? "Thanks 🙏🏻" : isLoading ? "Sending..." : "Send"}

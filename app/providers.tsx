@@ -26,11 +26,7 @@ const FarcasterContext = createContext<FarcasterContextType>({
 })
 
 export function useFarcaster() {
-  const context = useContext(FarcasterContext)
-  return {
-    ...context,
-    isInFarcaster: context.sdk !== null && context.isSDKLoaded,
-  }
+  return useContext(FarcasterContext)
 }
 
 export function FarcasterProvider({ children }: { children: ReactNode }) {
@@ -40,6 +36,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
   const [ethBalance, setEthBalance] = useState<string | null>(null)
   const [isWalletConnected, setIsWalletConnected] = useState(false)
   const [sdkInstance, setSdkInstance] = useState<typeof farcasterSdk | null>(null)
+  const [isInFarcaster, setIsInFarcaster] = useState(false)
 
   useEffect(() => {
     const savedAddress = localStorage.getItem("farcaster_wallet_address")
@@ -82,7 +79,6 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
                 frameContext.user.verified_addresses.eth_addresses?.length || 0,
               )
 
-              // Log each address individually
               frameContext.user.verified_addresses.eth_addresses?.forEach((addr, index) => {
                 console.log(`[v0] eth_address[${index}]:`, addr)
               })
@@ -91,6 +87,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
           }
 
           setContext(frameContext)
+          setIsInFarcaster(true)
 
           const address =
             frameContext?.user?.custody_address || frameContext?.user?.verified_addresses?.eth_addresses?.[0]
@@ -108,12 +105,14 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
           }
         } catch (contextError) {
           console.log("[v0] Context not available (might be in browser):", contextError)
+          setIsInFarcaster(false)
         }
       } catch (error) {
         console.error("[v0] Error loading SDK:", error)
         setSdkInstance(farcasterSdk)
         farcasterSdk.actions.ready()
         setIsSDKLoaded(true)
+        setIsInFarcaster(false)
       }
     }
 
@@ -200,7 +199,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
         connectWallet,
         isWalletConnected,
         sdk: sdkInstance || farcasterSdk,
-        isInFarcaster: sdkInstance !== null && isSDKLoaded,
+        isInFarcaster,
       }}
     >
       {children}

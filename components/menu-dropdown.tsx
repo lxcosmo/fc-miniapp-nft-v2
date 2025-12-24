@@ -5,13 +5,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useState } from "react"
 import { AboutModal } from "./modals/about-modal"
 import { WhatsNewModal } from "./modals/whats-new-modal"
+import { DonateModal } from "./modals/donate-modal"
 import { Menu } from "lucide-react"
 import { useFarcaster } from "@/app/providers"
 
 export function MenuDropdown() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false)
-  const { sdk, isInFarcaster } = useFarcaster()
+  const [donateOpen, setDonateOpen] = useState(false)
+  const { sdk } = useFarcaster()
 
   const handleCastFeedback = async () => {
     if (!sdk) return
@@ -25,23 +27,6 @@ export function MenuDropdown() {
     }
   }
 
-  const handleDonate = async () => {
-    if (!sdk?.actions?.sendToken) {
-      console.log("[v0] sendToken not available")
-      return
-    }
-
-    try {
-      const res = await sdk.actions.sendToken({
-        recipientAddress: "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee",
-      })
-
-      console.log("[v0] sendToken result:", res)
-    } catch (error) {
-      console.error("[v0] Error in sendToken:", error)
-    }
-  }
-
   return (
     <>
       <DropdownMenu>
@@ -51,19 +36,13 @@ export function MenuDropdown() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 py-2">
-          <DropdownMenuItem onSelect={() => setAboutOpen(true)} className="py-2.5 cursor-pointer hover:bg-muted">
+          <DropdownMenuItem onClick={() => setAboutOpen(true)} className="py-2.5 cursor-pointer hover:bg-muted">
             About
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={handleCastFeedback} className="py-2.5 cursor-pointer hover:bg-muted">
+          <DropdownMenuItem onClick={handleCastFeedback} className="py-2.5 cursor-pointer hover:bg-muted">
             Cast Feedback
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={(e) => {
-              e.preventDefault()
-              handleDonate()
-            }}
-            className="py-2.5 cursor-pointer hover:bg-muted"
-          >
+          <DropdownMenuItem onClick={() => setDonateOpen(true)} className="py-2.5 cursor-pointer hover:bg-muted">
             Donate
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -72,9 +51,9 @@ export function MenuDropdown() {
       <AboutModal
         open={aboutOpen}
         onOpenChange={setAboutOpen}
-        onDonateClick={async () => {
-          await handleDonate()
+        onDonateClick={() => {
           setAboutOpen(false)
+          setDonateOpen(true)
         }}
         onWhatsNewClick={() => {
           setAboutOpen(false)
@@ -82,6 +61,7 @@ export function MenuDropdown() {
         }}
       />
       <WhatsNewModal open={whatsNewOpen} onOpenChange={setWhatsNewOpen} />
+      <DonateModal open={donateOpen} onOpenChange={setDonateOpen} />
     </>
   )
 }
