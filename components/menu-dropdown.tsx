@@ -5,15 +5,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useState } from "react"
 import { AboutModal } from "./modals/about-modal"
 import { WhatsNewModal } from "./modals/whats-new-modal"
-import { DonateModal } from "./modals/donate-modal"
 import { Menu } from "lucide-react"
 import { useFarcaster } from "@/app/providers"
 
 export function MenuDropdown() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false)
-  const [donateOpen, setDonateOpen] = useState(false)
-  const { sdk } = useFarcaster()
+  const { sdk, walletAddress } = useFarcaster()
 
   const handleCastFeedback = async () => {
     if (!sdk) return
@@ -24,6 +22,23 @@ export function MenuDropdown() {
       })
     } catch (error) {
       console.error("Error opening composer:", error)
+    }
+  }
+
+  const handleDonate = async () => {
+    if (!sdk?.actions?.sendToken || !walletAddress) return
+
+    try {
+      const RECIPIENT_ADDRESS = "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee"
+      const BASE_ETH_CAIP19 = "eip155:8453/slip44:60"
+
+      await sdk.actions.sendToken({
+        token: BASE_ETH_CAIP19,
+        recipientAddress: RECIPIENT_ADDRESS,
+        amount: "0", // User will input amount in the dialog
+      })
+    } catch (error) {
+      console.log("[donate] Error opening sendToken dialog:", error)
     }
   }
 
@@ -42,7 +57,7 @@ export function MenuDropdown() {
           <DropdownMenuItem onClick={handleCastFeedback} className="py-2.5 cursor-pointer hover:bg-muted">
             Cast Feedback
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDonateOpen(true)} className="py-2.5 cursor-pointer hover:bg-muted">
+          <DropdownMenuItem onClick={handleDonate} className="py-2.5 cursor-pointer hover:bg-muted">
             Donate
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -53,7 +68,7 @@ export function MenuDropdown() {
         onOpenChange={setAboutOpen}
         onDonateClick={() => {
           setAboutOpen(false)
-          setDonateOpen(true)
+          handleDonate()
         }}
         onWhatsNewClick={() => {
           setAboutOpen(false)
@@ -61,7 +76,6 @@ export function MenuDropdown() {
         }}
       />
       <WhatsNewModal open={whatsNewOpen} onOpenChange={setWhatsNewOpen} />
-      <DonateModal open={donateOpen} onOpenChange={setDonateOpen} />
     </>
   )
 }
