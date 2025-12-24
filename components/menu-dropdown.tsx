@@ -8,13 +8,11 @@ import { WhatsNewModal } from "./modals/whats-new-modal"
 import { DonateModal } from "./modals/donate-modal"
 import { Menu } from "lucide-react"
 import { useFarcaster } from "@/app/providers"
-import { MintModal } from "./modals/mint-modal"
 
 export function MenuDropdown() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [whatsNewOpen, setWhatsNewOpen] = useState(false)
   const [donateOpen, setDonateOpen] = useState(false)
-  const [mintOpen, setMintOpen] = useState(false)
   const { sdk } = useFarcaster()
 
   const handleCastFeedback = async () => {
@@ -47,9 +45,6 @@ export function MenuDropdown() {
           <DropdownMenuItem onClick={() => setDonateOpen(true)} className="py-2.5 cursor-pointer hover:bg-muted">
             Donate
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setMintOpen(true)} className="py-2.5 cursor-pointer hover:bg-muted">
-            Mint
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -67,7 +62,6 @@ export function MenuDropdown() {
       />
       <WhatsNewModal open={whatsNewOpen} onOpenChange={setWhatsNewOpen} />
       <DonateModal open={donateOpen} onOpenChange={setDonateOpen} />
-      <MintModal open={mintOpen} onOpenChange={setMintOpen} />
     </>
   )
 }
