@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { ArrowUpNarrowWide, ArrowDownWideNarrow } from "lucide-react"
 import { Menu } from "@/components/menu-dropdown"
+import { useEthPrice } from "@/hooks/use-eth-price"
 
 export default function Page() {
   const { isSDKLoaded, walletAddress, ethBalance } = useFarcaster()
+  const { ethPrice } = useEthPrice()
   const [gridMode, setGridMode] = useState<2 | 3 | 4 | "list">(3)
   const [selectedNFTs, setSelectedNFTs] = useState<string[]>([])
   const [isSelectionMode, setIsSelectionMode] = useState(false)
@@ -91,8 +93,7 @@ export default function Page() {
     setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"))
   }
 
-  const ethToUsd = 2850
-  const nftUsdValue = (nftTotalValue * ethToUsd).toFixed(2)
+  const nftUsdValue = (nftTotalValue * ethPrice).toFixed(2)
 
   const handleCopy = () => {
     if (walletAddress) {

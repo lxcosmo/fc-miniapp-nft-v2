@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
 import { useFarcaster } from "@/app/providers"
+import { useEthPrice } from "@/hooks/use-eth-price"
 
 interface DonateModalProps {
   open: boolean
@@ -17,15 +18,16 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const { walletAddress, sdk, isInFarcaster } = useFarcaster()
+  const { ethPrice } = useEthPrice()
 
   useEffect(() => {
     if (amount) {
-      const usd = (Number(amount) * 2500).toFixed(2)
+      const usd = (Number(amount) * ethPrice).toFixed(2)
       setUsdValue(usd)
     } else {
       setUsdValue("")
     }
-  }, [amount])
+  }, [amount, ethPrice])
 
   useEffect(() => {
     if (open) {
@@ -86,11 +88,11 @@ export function DonateModal({ open, onOpenChange }: DonateModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Donate for coffe & pizza</DialogTitle>
+          <DialogTitle className="font-normal">Donate for coffe & pizza 👾</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground mb-3 block">Amount ETH in Base</label>
+            <label className="text-sm font-normal text-foreground mb-3 block">Amount ETH in Base</label>
             <div className="flex items-center gap-2">
               <Input
                 type="number"
