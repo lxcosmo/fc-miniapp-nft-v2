@@ -32,7 +32,6 @@ export function MenuDropdown() {
     }
 
     try {
-      console.log("[v0] Opening sendToken dialog...")
       const res = await sdk.actions.sendToken({
         recipientAddress: "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee",
       })
