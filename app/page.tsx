@@ -104,6 +104,26 @@ export default function Page() {
     setIsHeaderCollapsed((prev) => !prev)
   }
 
+  const handleDonate = async () => {
+    try {
+      const { sdk } = await import("@farcaster/miniapp-sdk")
+      if (!sdk?.actions?.sendToken) return
+
+      const res = await sdk.actions.sendToken({
+        recipientAddress: "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee",
+        token: "eip155:8453/slip44:60", // ETH on Base
+      })
+
+      if (!res.success) {
+        console.error("[v0] Donate failed:", res.reason, res.error)
+      } else {
+        console.log("[v0] Donate tx:", res.send.transaction)
+      }
+    } catch (error) {
+      console.error("[v0] Donate error:", error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="max-w-6xl mx-auto px-4 py-4">
@@ -123,6 +143,9 @@ export default function Page() {
                 </Button>
               </div>
               <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleDonate} className="bg-transparent">
+                  Donate
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => router.push("/hidden")} className="bg-transparent">
                   Hidden NFTs
                 </Button>
