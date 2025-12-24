@@ -26,22 +26,25 @@ export function MenuDropdown() {
   }
 
   const handleDonate = async () => {
+    console.log("[v0] handleDonate called")
+
     if (!sdk?.actions?.sendToken) {
-      console.log("[donate] SDK not available")
+      console.log("[v0] sendToken not available")
       return
     }
 
-    try {
-      const RECIPIENT_FID = 3939 // lxc5m's FID
-      const BASE_ETH = "eip155:8453/slip44:60" // ETH on Base (CAIP-19)
+    const RECIPIENT_ADDRESS = "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee"
+    const BASE_ETH = "eip155:8453/slip44:60" // ETH on Base
 
-      await sdk.actions.sendToken({
-        recipientFid: RECIPIENT_FID,
-        token: BASE_ETH,
-        // amount not required - user will input in dialog
-      })
-    } catch (error) {
-      console.log("[donate] Error opening sendToken dialog:", error)
+    const res = await sdk.actions.sendToken({
+      recipientAddress: RECIPIENT_ADDRESS,
+      token: BASE_ETH,
+    })
+
+    if (!res?.success) {
+      console.log("[v0] sendToken failed:", res?.reason, res?.error)
+    } else {
+      console.log("[v0] sendToken success, tx:", res.send?.transaction)
     }
   }
 
