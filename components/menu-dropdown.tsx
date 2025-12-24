@@ -34,6 +34,7 @@ export function MenuDropdown() {
     try {
       const res = await sdk.actions.sendToken({
         recipientAddress: "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee",
+        token: "eip155:8453/slip44:60", // добавил токен ETH на Base чтобы он был предзаполнен
       })
 
       console.log("[v0] sendToken result:", res)
