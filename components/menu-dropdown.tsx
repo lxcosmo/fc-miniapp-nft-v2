@@ -26,17 +26,21 @@ export function MenuDropdown() {
   }
 
   const handleDonate = async () => {
-    if (!isInFarcaster) {
-      alert("Open this app in Warpcast to donate.")
+    if (!sdk?.actions?.sendToken) {
+      console.log("[v0] sendToken not available")
       return
     }
 
-    const res = await sdk.actions.sendToken({
-      recipientAddress: "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee",
-      token: "eip155:8453/slip44:60",
-    })
+    try {
+      console.log("[v0] Opening sendToken dialog...")
+      const res = await sdk.actions.sendToken({
+        recipientAddress: "0xdBB9f76DC289B4cec58BCfe10923084F96Fa6Aee",
+      })
 
-    console.log("[v0] sendToken:", res)
+      console.log("[v0] sendToken result:", res)
+    } catch (error) {
+      console.error("[v0] Error in sendToken:", error)
+    }
   }
 
   return (

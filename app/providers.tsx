@@ -11,6 +11,7 @@ interface FarcasterContextType {
   connectWallet: () => Promise<void>
   isWalletConnected: boolean
   sdk: typeof farcasterSdk | null
+  isInFarcaster: boolean
 }
 
 const FarcasterContext = createContext<FarcasterContextType>({
@@ -21,10 +22,15 @@ const FarcasterContext = createContext<FarcasterContextType>({
   connectWallet: async () => {},
   isWalletConnected: false,
   sdk: null,
+  isInFarcaster: false,
 })
 
 export function useFarcaster() {
-  return useContext(FarcasterContext)
+  const context = useContext(FarcasterContext)
+  return {
+    ...context,
+    isInFarcaster: context.sdk !== null && context.isSDKLoaded,
+  }
 }
 
 export function FarcasterProvider({ children }: { children: ReactNode }) {
@@ -194,6 +200,7 @@ export function FarcasterProvider({ children }: { children: ReactNode }) {
         connectWallet,
         isWalletConnected,
         sdk: sdkInstance || farcasterSdk,
+        isInFarcaster: sdkInstance !== null && isSDKLoaded,
       }}
     >
       {children}
