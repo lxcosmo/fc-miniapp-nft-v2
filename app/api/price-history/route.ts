@@ -11,9 +11,9 @@ export async function GET(request: NextRequest) {
   try {
     const oneYearAgo = Math.floor(Date.now() / 1000) - 365 * 24 * 60 * 60
 
-    const url = `https://api.reservoir.tools/collections/${contractAddress}/floor-ask/events/v1?startTimestamp=${oneYearAgo}&limit=500`
+    const url = `/api/flow-price-history?contractAddress=${contractAddress}&startTimestamp=${oneYearAgo}&limit=500`
 
-    console.log("[v0] Fetching price history from Reservoir:", url)
+    console.log("[v0] Fetching price history from Flow Price History API:", url)
 
     const response = await fetch(url, {
       headers: {
@@ -22,12 +22,12 @@ export async function GET(request: NextRequest) {
     })
 
     if (!response.ok) {
-      console.error("[v0] Reservoir API error:", response.status, response.statusText)
+      console.error("[v0] Flow Price History API error:", response.status, response.statusText)
       return NextResponse.json({ events: [] })
     }
 
     const data = await response.json()
-    console.log("[v0] Reservoir response:", data)
+    console.log("[v0] Flow Price History response:", data)
 
     if (!data.events || !Array.isArray(data.events)) {
       return NextResponse.json({ events: [] })
