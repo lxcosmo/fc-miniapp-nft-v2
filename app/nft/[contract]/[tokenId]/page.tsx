@@ -155,7 +155,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
                     </div>
                     {formattedFloor && (
                       <div className="text-xs text-muted-foreground">
-                        ${(Number(formattedFloor) * ethPrice).toFixed(5)}
+                        ${(Number(formattedFloor) * ethPrice).toFixed(4)}
                       </div>
                     )}
                   </div>
@@ -181,7 +181,7 @@ export default function NFTDetailPage({ params }: { params: { contract: string; 
                         <Line
                           type="monotone"
                           dataKey="price"
-                          stroke="hsl(var(--primary))"
+                          stroke="#3b82f6"
                           strokeWidth={2}
                           dot={false}
                           fill="none"
