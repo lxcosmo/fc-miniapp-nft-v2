@@ -8,7 +8,7 @@ import "./globals.css"
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
-const APP_URL = "https://miniapp-nft-v2.vercel.app"
+const APP_URL = "https://nft-awallet.vercel.app"
 
 const miniAppEmbed = {
   version: "1",

@@ -20,7 +20,7 @@ export function MenuDropdown() {
     try {
       await sdk.actions.composeCast({
         text: "Just tried a new Farcaster app",
-        embeds: ["https://miniapp-nft-v2.vercel.app/"],
+        embeds: ["https://nft-awallet.vercel.app/"],
       })
     } catch (error) {
       console.error("Error opening composer:", error)
