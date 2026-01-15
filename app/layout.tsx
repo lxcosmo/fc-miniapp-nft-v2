@@ -42,10 +42,7 @@ export const metadata: Metadata = {
     images: [`${APP_URL}/embed.png`],
   },
   other: {
-    // 🔹 Farcaster mini-app embed
     "fc:miniapp": JSON.stringify(miniAppEmbed),
-
-    // 🔹 Base app ownership verification
     "base:app_id": "6968c5f04991800a6d9d649d",
   },
   generator: "v0.app",
