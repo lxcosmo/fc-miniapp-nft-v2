@@ -4,7 +4,6 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { FarcasterProvider } from "./providers"
 import "./globals.css"
-import { Metadata } from 'next';
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -24,16 +23,6 @@ const miniAppEmbed = {
       splashBackgroundColor: "#ffffff",
     },
   },
-}
-
-export const metadata: Metadata = {
-  other: {
-    'base:app_id': '6968c5f04991800a6d9d649d',
-  },
-};
-
-export default function Home() {
-  return <div>{/* Your page content */}</div>;
 }
 
 export const metadata: Metadata = {
