@@ -17,13 +17,13 @@
     "splashBackgroundColor": "#ffffff",
     "webhookUrl": "https://nft-awallet.vercel.app/api/webhook",
     "subtitle": "Advanced NFT Wallet",
-    "description": "NFT Wallet — view your NFTs, explore collections, and manage assets.",
+    "description": "NFT Wallet — view your NFTs, explore collections, and manage assets directly in Farcaster & Base App.",
     "primaryCategory": "utility",
-    "tagline": "Manage NFTs",
+    "tagline": "Manage NFTs in FC and Base App",
     "buttonTitle": "Open Mini App",
 
-    "ogTitle": "NFT aWallet",
-    "ogDescription": "Manage NFTs and assets in real-time",
+    "ogTitle": "NFT Wallet for FC and Base App",
+    "ogDescription": "Manage NFTs and assets in real-time. Explore collections and with Farcaster and Base App.",
 
     "tags": ["nft", "wallet"],
 
