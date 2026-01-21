@@ -26,7 +26,7 @@ const miniAppEmbed = {
 }
 
 export const metadata: Metadata = {
-  title: "Farcaster NFT Wallet",
+  title: "NFT aWallet",
   description: "View your ETH balance and NFT collection",
   manifest: "/manifest.json",
   icons: {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Farcaster NFT Wallet",
+    title: "NFT aWallet",
     description: "View your NFTs",
     images: [`${APP_URL}/embed2.png`],
   },
